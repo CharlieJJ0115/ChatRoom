@@ -1,5 +1,9 @@
 import {
+  collection,
   doc,
+  onSnapshot,
+  query,
+  orderBy,
   setDoc,
   serverTimestamp
 } from "firebase/firestore";
@@ -21,6 +25,25 @@ export async function createUserDocument(user) {
     blockedUsers: [],
 
     createdAt: serverTimestamp()
+
+  });
+}
+
+export function subscribeUsers(callback) {
+
+  const q = query(
+    collection(db, "users"),
+    orderBy("email")
+  );
+
+  return onSnapshot(q, (snapshot) => {
+
+    const users = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    callback(users);
 
   });
 }

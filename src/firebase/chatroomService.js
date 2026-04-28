@@ -1,12 +1,19 @@
 import {
   collection,
   addDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
   serverTimestamp
 } from "firebase/firestore";
 
 import { db } from "./firebase";
 
-export async function createChatroom(name, uid) {
+export async function createChatroom(name, uid, memberUids = []) {
+
+  const members = Array.from(new Set([uid, ...memberUids]));
 
   await addDoc(collection(db, "chatrooms"), {
 
@@ -14,7 +21,7 @@ export async function createChatroom(name, uid) {
 
     type: "group",
 
-    members: [uid],
+    members,
 
     createdBy: uid,
 
@@ -23,6 +30,54 @@ export async function createChatroom(name, uid) {
     updatedAt: serverTimestamp(),
 
     lastMessage: ""
+
+  });
+}
+
+export async function sendMessage(roomId, user, text) {
+
+  const messageText = text.trim();
+
+  if (!messageText) return;
+
+  await addDoc(collection(db, "chatrooms", roomId, "messages"), {
+
+    text: messageText,
+
+    senderId: user.uid,
+
+    senderEmail: user.email,
+
+    type: "text",
+
+    createdAt: serverTimestamp()
+
+  });
+
+  await updateDoc(doc(db, "chatrooms", roomId), {
+
+    lastMessage: messageText,
+
+    updatedAt: serverTimestamp()
+
+  });
+}
+
+export function subscribeMessages(roomId, callback) {
+
+  const q = query(
+    collection(db, "chatrooms", roomId, "messages"),
+    orderBy("createdAt", "asc")
+  );
+
+  return onSnapshot(q, (snapshot) => {
+
+    const messages = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    callback(messages);
 
   });
 }

@@ -14,14 +14,12 @@ function App() {
 
   const [isLogin, setIsLogin] = useState(true);
 
-  // 已登入
   if (currentUser) {
 
     return <ChatPage />;
 
   }
 
-  // 未登入
   return (
 
     <div>

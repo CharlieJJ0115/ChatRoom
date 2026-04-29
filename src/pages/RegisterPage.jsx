@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-import { useAuth } from "../contexts/AuthContext";
+import useAuth from "../hooks/useAuth";
 
 import { createUserDocument } from "../firebase/userService";
 
@@ -30,8 +30,6 @@ export default function RegisterPage() {
 
       alert("Register Success!");
 
-      alert("Register Success!");
-
     } catch (err) {
 
       setError(err.message);
@@ -40,34 +38,40 @@ export default function RegisterPage() {
   }
 
   return (
-    <div>
+    <div className="auth-form">
+      <div className="auth-form-header">
+        <p className="eyebrow">Get started</p>
+        <h2>Create account</h2>
+        <p>Register with email and password to join the chatroom app.</p>
+      </div>
 
-      <h1>Register</h1>
-
-      {error && <p>{error}</p>}
+      {error && <p className="form-error">{error}</p>}
 
       <form onSubmit={handleSubmit}>
+        <label className="field-group">
+          <span>Email</span>
+          <input
+            type="email"
+            placeholder="you@example.com"
+            ref={emailRef}
+            required
+          />
+        </label>
 
-        <input
-          type="email"
-          placeholder="email"
-          ref={emailRef}
-          required
-        />
+        <label className="field-group">
+          <span>Password</span>
+          <input
+            type="password"
+            placeholder="Create a password"
+            ref={passwordRef}
+            required
+          />
+        </label>
 
-        <input
-          type="password"
-          placeholder="password"
-          ref={passwordRef}
-          required
-        />
-
-        <button type="submit">
-          Register
+        <button className="auth-submit" type="submit">
+          Create account
         </button>
-
       </form>
-
     </div>
   );
 }

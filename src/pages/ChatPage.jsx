@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { useAuth } from "../contexts/AuthContext";
+import useAuth from "../hooks/useAuth";
 
 import {
   createChatroom,
@@ -29,6 +29,10 @@ export default function ChatPage() {
   const [messageText, setMessageText] = useState("");
 
   const roomNameRef = useRef();
+
+  const selectedRoomMembers = selectedRoom
+    ? users.filter((user) => selectedRoom.members?.includes(user.uid))
+    : [];
 
   useEffect(() => {
 
@@ -70,10 +74,12 @@ export default function ChatPage() {
 
   async function handleCreateRoom() {
 
-    if (!roomNameRef.current.value) return;
+    const roomName = roomNameRef.current.value.trim();
+
+    if (!roomName) return;
 
     await createChatroom(
-      roomNameRef.current.value,
+      roomName,
       currentUser.uid,
       selectedUserIds
     );
@@ -120,130 +126,213 @@ export default function ChatPage() {
   }
 
   return (
-    <div>
+    <main className="chat-app">
 
-      <h1>Welcome</h1>
+      <aside className="chat-sidebar">
 
-      <p>{currentUser.email}</p>
-
-      <button onClick={handleLogout}>
-        Logout
-      </button>
-
-      <hr />
-
-      <h2>Create Chatroom</h2>
-
-      <input
-        type="text"
-        placeholder="Room Name"
-        ref={roomNameRef}
-      />
-
-      <h3>Add Members</h3>
-
-      {
-        users.length === 0 && (
-          <p>No other registered users found.</p>
-        )
-      }
-
-      {
-        users.map((user) => (
-
-          <label key={user.uid} style={{ display: "block" }}>
-
-            <input
-              type="checkbox"
-              checked={selectedUserIds.includes(user.uid)}
-              onChange={() => handleSelectUser(user.uid)}
-            />
-
-            {user.username} ({user.email})
-
-          </label>
-
-        ))
-      }
-
-      <button onClick={handleCreateRoom}>
-        Create
-      </button>
-       <hr />
-
-        <h2>My Chatrooms</h2>
-
-        {
-        chatrooms.map((room) => (
-
-            <div key={room.id}>
-
-            <button onClick={() => handleSelectRoom(room)}>
-              {room.name}
-            </button>
-
-            </div>
-
-        ))
-        }
-
-      <hr />
-
-      <h2>Current Chatroom</h2>
-
-      {
-        selectedRoom ? (
-          <div>
-
-            <p>Current Chatroom: {selectedRoom.name}</p>
-
-            <div>
-
-              {
-                messages.length === 0 && (
-                  <p>No messages yet.</p>
-                )
-              }
-
-              {
-                messages.map((message) => (
-
-                  <p key={message.id}>
-                    <strong>
-                      {message.senderId === currentUser.uid
-                        ? "You"
-                        : message.senderEmail
-                      }
-                      :
-                    </strong>{" "}
-                    {message.text}
-                  </p>
-
-                ))
-              }
-
-            </div>
-
-            <form onSubmit={handleSendMessage}>
-
-              <input
-                type="text"
-                placeholder="Type a message"
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-              />
-
-              <button type="submit">
-                Send
-              </button>
-
-            </form>
-
+        <section className="profile-panel">
+          <div className="avatar">
+            {currentUser.email?.charAt(0).toUpperCase()}
           </div>
-        ) : (
-          <p>Select a chatroom to start chatting.</p>
-        )
-      }
-    </div>
+
+          <div className="profile-text">
+            <p className="profile-label">Signed in as</p>
+            <h1>{currentUser.email}</h1>
+          </div>
+
+          <button className="ghost-button" onClick={handleLogout}>
+            Logout
+          </button>
+        </section>
+
+        <section className="room-list-panel">
+          <div className="section-heading">
+            <h2>My Chatrooms</h2>
+            <span>{chatrooms.length}</span>
+          </div>
+
+          {
+            chatrooms.length === 0 ? (
+              <p className="empty-copy">
+                No chatrooms yet. Create one and invite members to start.
+              </p>
+            ) : (
+              <div className="room-list">
+                {
+                  chatrooms.map((room) => (
+                    <button
+                      className={`room-item ${selectedRoom?.id === room.id ? "active" : ""}`}
+                      key={room.id}
+                      onClick={() => handleSelectRoom(room)}
+                    >
+                      <span className="room-avatar">
+                        {room.name?.charAt(0).toUpperCase()}
+                      </span>
+
+                      <span className="room-meta">
+                        <strong>{room.name}</strong>
+                        <small>{room.lastMessage || "No messages yet"}</small>
+                      </span>
+                    </button>
+                  ))
+                }
+              </div>
+            )
+          }
+        </section>
+      </aside>
+
+      <section className="chat-main">
+        {
+          selectedRoom ? (
+            <>
+              <header className="chat-header">
+                <div>
+                  <p className="eyebrow">Current Chatroom</p>
+                  <h2>{selectedRoom.name}</h2>
+                </div>
+
+                <span className="member-count">
+                  {selectedRoom.members?.length || 0} members
+                </span>
+              </header>
+
+              <div className="message-list">
+                {
+                  messages.length === 0 && (
+                    <div className="center-empty">
+                      <h3>No messages yet</h3>
+                      <p>Send the first message to this chatroom.</p>
+                    </div>
+                  )
+                }
+
+                {
+                  messages.map((message) => {
+                    const isOwnMessage = message.senderId === currentUser.uid;
+
+                    return (
+                      <article
+                        className={`message-row ${isOwnMessage ? "own" : ""}`}
+                        key={message.id}
+                      >
+                        <div className="message-bubble">
+                          <span className="message-sender">
+                            {isOwnMessage ? "You" : message.senderEmail}
+                          </span>
+                          <p>{message.text}</p>
+                        </div>
+                      </article>
+                    );
+                  })
+                }
+              </div>
+
+              <form className="message-form" onSubmit={handleSendMessage}>
+                <input
+                  type="text"
+                  placeholder="Type a message"
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                />
+
+                <button type="submit">
+                  Send
+                </button>
+              </form>
+            </>
+          ) : (
+            <div className="select-room-empty">
+              <h2>Select a chatroom</h2>
+              <p>Choose one of your chatrooms to load its message history.</p>
+            </div>
+          )
+        }
+      </section>
+
+      <aside className="chat-tools">
+        <section className="tool-panel">
+          <div className="section-heading">
+            <h2>Create Chatroom</h2>
+          </div>
+
+          <input
+            className="room-name-input"
+            type="text"
+            placeholder="Room name"
+            ref={roomNameRef}
+          />
+
+          <div className="member-picker">
+            <h3>Add Members</h3>
+
+            {
+              users.length === 0 && (
+                <p className="empty-copy">No other registered users found.</p>
+              )
+            }
+
+            {
+              users.map((user) => (
+                <label className="member-option" key={user.uid}>
+                  <input
+                    type="checkbox"
+                    checked={selectedUserIds.includes(user.uid)}
+                    onChange={() => handleSelectUser(user.uid)}
+                  />
+
+                  <span>
+                    <strong>{user.username}</strong>
+                    <small>{user.email}</small>
+                  </span>
+                </label>
+              ))
+            }
+          </div>
+
+          <button className="primary-button" onClick={handleCreateRoom}>
+            Create Chatroom
+          </button>
+        </section>
+
+        <section className="tool-panel">
+          <div className="section-heading">
+            <h2>Room Members</h2>
+          </div>
+
+          {
+            selectedRoom ? (
+              <div className="member-list">
+                <div className="member-chip">
+                  <span className="small-avatar">
+                    {currentUser.email?.charAt(0).toUpperCase()}
+                  </span>
+                  <span>
+                    <strong>You</strong>
+                    <small>{currentUser.email}</small>
+                  </span>
+                </div>
+
+                {
+                  selectedRoomMembers.map((user) => (
+                    <div className="member-chip" key={user.uid}>
+                      <span className="small-avatar">
+                        {user.email?.charAt(0).toUpperCase()}
+                      </span>
+                      <span>
+                        <strong>{user.username}</strong>
+                        <small>{user.email}</small>
+                      </span>
+                    </div>
+                  ))
+                }
+              </div>
+            ) : (
+              <p className="empty-copy">Select a chatroom to see members.</p>
+            )
+          }
+        </section>
+      </aside>
+    </main>
   );
 }

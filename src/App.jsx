@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { useAuth } from "./contexts/AuthContext";
+import useAuth from "./hooks/useAuth";
 
 import LoginPage from "./pages/LoginPage";
 
@@ -21,22 +21,37 @@ function App() {
   }
 
   return (
+    <main className="auth-page">
+      <section className="auth-hero">
+        <div className="auth-brand">
+          <span className="brand-mark">C</span>
+          <span>Midterm Chatroom</span>
+        </div>
 
-    <div>
+        <div className="auth-copy">
+          <p className="eyebrow">Firebase Chat App</p>
+          <h1>Chat with your classmates in private rooms.</h1>
+          <p>
+            Create chatrooms, invite members, and keep the full message history
+            available for everyone in the room.
+          </p>
+        </div>
+      </section>
 
-      {isLogin ? <LoginPage /> : <RegisterPage />}
+      <section className="auth-card">
+        {isLogin ? <LoginPage /> : <RegisterPage />}
 
-      <button onClick={() => setIsLogin(!isLogin)}>
+        <div className="auth-switch">
+          <span>
+            {isLogin ? "New to this chatroom?" : "Already have an account?"}
+          </span>
 
-        {isLogin
-          ? "Need an account?"
-          : "Already have an account?"
-        }
-
-      </button>
-
-    </div>
-
+          <button type="button" onClick={() => setIsLogin(!isLogin)}>
+            {isLogin ? "Create account" : "Sign in"}
+          </button>
+        </div>
+      </section>
+    </main>
   );
 }
 

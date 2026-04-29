@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-import { useAuth } from "../contexts/AuthContext";
+import useAuth from "../hooks/useAuth";
 
 export default function LoginPage() {
 
@@ -35,34 +35,40 @@ export default function LoginPage() {
   }
 
   return (
-    <div>
+    <div className="auth-form">
+      <div className="auth-form-header">
+        <p className="eyebrow">Welcome back</p>
+        <h2>Sign in</h2>
+        <p>Use your email and password to continue to your chatrooms.</p>
+      </div>
 
-      <h1>Login</h1>
-
-      {error && <p>{error}</p>}
+      {error && <p className="form-error">{error}</p>}
 
       <form onSubmit={handleSubmit}>
+        <label className="field-group">
+          <span>Email</span>
+          <input
+            type="email"
+            placeholder="you@example.com"
+            ref={emailRef}
+            required
+          />
+        </label>
 
-        <input
-          type="email"
-          placeholder="email"
-          ref={emailRef}
-          required
-        />
+        <label className="field-group">
+          <span>Password</span>
+          <input
+            type="password"
+            placeholder="Enter your password"
+            ref={passwordRef}
+            required
+          />
+        </label>
 
-        <input
-          type="password"
-          placeholder="password"
-          ref={passwordRef}
-          required
-        />
-
-        <button type="submit">
-          Login
+        <button className="auth-submit" type="submit">
+          Sign in
         </button>
-
       </form>
-
     </div>
   );
 }

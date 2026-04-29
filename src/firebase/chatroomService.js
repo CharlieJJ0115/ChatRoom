@@ -2,6 +2,7 @@ import {
   collection,
   addDoc,
   doc,
+  arrayUnion,
   onSnapshot,
   orderBy,
   query,
@@ -30,6 +31,19 @@ export async function createChatroom(name, uid, memberUids = []) {
     updatedAt: serverTimestamp(),
 
     lastMessage: ""
+
+  });
+}
+
+export async function addMembersToChatroom(roomId, memberUids = []) {
+
+  if (!roomId || memberUids.length === 0) return;
+
+  await updateDoc(doc(db, "chatrooms", roomId), {
+
+    members: arrayUnion(...memberUids),
+
+    updatedAt: serverTimestamp()
 
   });
 }

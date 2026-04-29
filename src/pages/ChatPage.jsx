@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import useAuth from "../hooks/useAuth";
 
 import {
+  addMembersToChatroom,
   createChatroom,
   sendMessage,
   subscribeMessages
@@ -22,7 +23,9 @@ export default function ChatPage() {
 
   const [selectedUserIds, setSelectedUserIds] = useState([]);
 
-  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [inviteUserIds, setInviteUserIds] = useState([]);
+
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
 
   const [messages, setMessages] = useState([]);
 
@@ -30,8 +33,14 @@ export default function ChatPage() {
 
   const roomNameRef = useRef();
 
+  const selectedRoom = chatrooms.find((room) => room.id === selectedRoomId);
+
   const selectedRoomMembers = selectedRoom
     ? users.filter((user) => selectedRoom.members?.includes(user.uid))
+    : [];
+
+  const availableInviteUsers = selectedRoom
+    ? users.filter((user) => !selectedRoom.members?.includes(user.uid))
     : [];
 
   useEffect(() => {
@@ -52,13 +61,13 @@ export default function ChatPage() {
 
   useEffect(() => {
 
-    if (!selectedRoom) return;
+    if (!selectedRoomId) return;
 
-    const unsubscribe = subscribeMessages(selectedRoom.id, setMessages);
+    const unsubscribe = subscribeMessages(selectedRoomId, setMessages);
 
     return unsubscribe;
 
-  }, [selectedRoom]);
+  }, [selectedRoomId]);
 
   if (!currentUser) {
 
@@ -109,7 +118,34 @@ export default function ChatPage() {
 
     setMessages([]);
 
-    setSelectedRoom(room);
+    setSelectedRoomId(room.id);
+
+    setInviteUserIds([]);
+
+  }
+
+  function handleSelectInviteUser(uid) {
+
+    setInviteUserIds((prev) => {
+
+      if (prev.includes(uid)) {
+        return prev.filter((selectedUid) => selectedUid !== uid);
+      }
+
+      return [...prev, uid];
+
+    });
+  }
+
+  async function handleAddMembers() {
+
+    if (!selectedRoom || inviteUserIds.length === 0) return;
+
+    await addMembersToChatroom(selectedRoom.id, inviteUserIds);
+
+    setInviteUserIds([]);
+
+    alert("Members Added!");
 
   }
 
@@ -302,31 +338,73 @@ export default function ChatPage() {
 
           {
             selectedRoom ? (
-              <div className="member-list">
-                <div className="member-chip">
-                  <span className="small-avatar">
-                    {currentUser.email?.charAt(0).toUpperCase()}
-                  </span>
-                  <span>
-                    <strong>You</strong>
-                    <small>{currentUser.email}</small>
-                  </span>
+              <>
+                <div className="member-list">
+                  <div className="member-chip">
+                    <span className="small-avatar">
+                      {currentUser.email?.charAt(0).toUpperCase()}
+                    </span>
+                    <span>
+                      <strong>You</strong>
+                      <small>{currentUser.email}</small>
+                    </span>
+                  </div>
+
+                  {
+                    selectedRoomMembers.map((user) => (
+                      <div className="member-chip" key={user.uid}>
+                        <span className="small-avatar">
+                          {user.email?.charAt(0).toUpperCase()}
+                        </span>
+                        <span>
+                          <strong>{user.username}</strong>
+                          <small>{user.email}</small>
+                        </span>
+                      </div>
+                    ))
+                  }
                 </div>
 
-                {
-                  selectedRoomMembers.map((user) => (
-                    <div className="member-chip" key={user.uid}>
-                      <span className="small-avatar">
-                        {user.email?.charAt(0).toUpperCase()}
-                      </span>
-                      <span>
-                        <strong>{user.username}</strong>
-                        <small>{user.email}</small>
-                      </span>
-                    </div>
-                  ))
-                }
-              </div>
+                <div className="invite-panel">
+                  <h3>Add More Members</h3>
+
+                  {
+                    availableInviteUsers.length === 0 ? (
+                      <p className="empty-copy">
+                        All registered users are already in this room.
+                      </p>
+                    ) : (
+                      <>
+                        {
+                          availableInviteUsers.map((user) => (
+                            <label className="member-option" key={user.uid}>
+                              <input
+                                type="checkbox"
+                                checked={inviteUserIds.includes(user.uid)}
+                                onChange={() => handleSelectInviteUser(user.uid)}
+                              />
+
+                              <span>
+                                <strong>{user.username}</strong>
+                                <small>{user.email}</small>
+                              </span>
+                            </label>
+                          ))
+                        }
+
+                        <button
+                          className="secondary-button"
+                          type="button"
+                          onClick={handleAddMembers}
+                          disabled={inviteUserIds.length === 0}
+                        >
+                          Add Members
+                        </button>
+                      </>
+                    )
+                  }
+                </div>
+              </>
             ) : (
               <p className="empty-copy">Select a chatroom to see members.</p>
             )

@@ -46,6 +46,10 @@ export default function ChatPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [isSearchPanelOpen, setIsSearchPanelOpen] = useState(false);
+
+  const [highlightedMessageId, setHighlightedMessageId] = useState(null);
+
   const [editingMessageId, setEditingMessageId] = useState(null);
 
   const [editingMessageText, setEditingMessageText] = useState("");
@@ -65,6 +69,8 @@ export default function ChatPage() {
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
 
   const roomNameRef = useRef();
+
+  const messageRefs = useRef({});
 
   const selectedRoom = chatrooms.find((room) => room.id === selectedRoomId);
 
@@ -232,6 +238,43 @@ export default function ChatPage() {
 
   }
 
+  function handleOpenSearchPanel() {
+
+    if (!selectedRoom) return;
+
+    setIsSearchPanelOpen(true);
+
+  }
+
+  function handleCloseSearchPanel() {
+
+    setIsSearchPanelOpen(false);
+
+  }
+
+  function handleJumpToMessage(messageId) {
+
+    const messageElement = messageRefs.current[messageId];
+
+    setIsSearchPanelOpen(false);
+
+    setHighlightedMessageId(messageId);
+
+    if (messageElement) {
+      messageElement.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    }
+
+    window.setTimeout(() => {
+      setHighlightedMessageId((currentId) => (
+        currentId === messageId ? null : currentId
+      ));
+    }, 2000);
+
+  }
+
   function handleProfileChange(e) {
 
     const { name, value } = e.target;
@@ -316,6 +359,10 @@ export default function ChatPage() {
     setInviteUserIds([]);
 
     setSearchQuery("");
+
+    setIsSearchPanelOpen(false);
+
+    setHighlightedMessageId(null);
 
     setEditingMessageId(null);
 
@@ -432,7 +479,7 @@ export default function ChatPage() {
 
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
-  const filteredMessages = normalizedSearchQuery
+  const searchResults = normalizedSearchQuery
     ? messages.filter((message) => {
         if (message.isUnsent) return false;
 
@@ -452,7 +499,7 @@ export default function ChatPage() {
 
         return searchableText.includes(normalizedSearchQuery);
       })
-    : messages;
+    : [];
 
   return (
     <main className="chat-app">
@@ -526,23 +573,24 @@ export default function ChatPage() {
                   <h2>{selectedRoom.name}</h2>
                 </div>
 
-                <button
-                  className="member-count-button"
-                  type="button"
-                  onClick={handleOpenMembersModal}
-                >
-                  {visibleMemberCount} members
-                </button>
-              </header>
+                <div className="chat-header-actions">
+                  <button
+                    className="header-action-button"
+                    type="button"
+                    onClick={handleOpenSearchPanel}
+                  >
+                    Search
+                  </button>
 
-              <div className="message-search">
-                <input
-                  type="search"
-                  placeholder="Search messages"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+                  <button
+                    className="member-count-button"
+                    type="button"
+                    onClick={handleOpenMembersModal}
+                  >
+                    {visibleMemberCount} members
+                  </button>
+                </div>
+              </header>
 
               <div className="message-list">
                 {messageActionError && <p className="form-error">{messageActionError}</p>}
@@ -557,16 +605,7 @@ export default function ChatPage() {
                 }
 
                 {
-                  messages.length > 0 && filteredMessages.length === 0 && (
-                    <div className="center-empty">
-                      <h3>No matching messages</h3>
-                      <p>Clear the search field to show every message.</p>
-                    </div>
-                  )
-                }
-
-                {
-                  filteredMessages.map((message) => {
+                  messages.map((message) => {
                     const sender = getUserById(message.senderId) || {
                       email: message.senderEmail,
                       username: message.senderEmail
@@ -576,8 +615,13 @@ export default function ChatPage() {
 
                     return (
                       <article
-                        className={`message-row ${isOwnMessage ? "own" : ""}`}
+                        className={`message-row ${isOwnMessage ? "own" : ""} ${highlightedMessageId === message.id ? "highlighted" : ""}`}
                         key={message.id}
+                        ref={(element) => {
+                          if (element) {
+                            messageRefs.current[message.id] = element;
+                          }
+                        }}
                       >
                         {renderAvatar(sender, "small-avatar", {
                           onClick: isOwnMessage ? null : () => handleOpenReadonlyProfile(sender)
@@ -647,6 +691,76 @@ export default function ChatPage() {
                   Send
                 </button>
               </form>
+
+              {
+                isSearchPanelOpen && (
+                  <aside className="search-panel" aria-label="Search messages">
+                    <div className="search-panel-header">
+                      <div>
+                        <p className="eyebrow">Search</p>
+                        <h3>Messages</h3>
+                      </div>
+
+                      <button className="modal-close" type="button" onClick={handleCloseSearchPanel}>
+                        Close
+                      </button>
+                    </div>
+
+                    <div className="search-panel-input">
+                      <input
+                        type="search"
+                        placeholder="Search messages"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        autoFocus
+                      />
+
+                      {searchQuery && (
+                        <button type="button" onClick={() => setSearchQuery("")}>
+                          Clear
+                        </button>
+                      )}
+                    </div>
+
+                    <p className="search-result-count">
+                      {normalizedSearchQuery ? `${searchResults.length} results` : "Type to search this chatroom"}
+                    </p>
+
+                    <div className="search-result-list">
+                      {
+                        normalizedSearchQuery && searchResults.length === 0 && (
+                          <p className="empty-copy">No matching messages found.</p>
+                        )
+                      }
+
+                      {
+                        searchResults.map((message) => {
+                          const sender = getUserById(message.senderId) || {
+                            email: message.senderEmail,
+                            username: message.senderEmail
+                          };
+
+                          return (
+                            <button
+                              className="search-result-item"
+                              type="button"
+                              key={message.id}
+                              onClick={() => handleJumpToMessage(message.id)}
+                            >
+                              {renderAvatar(sender)}
+
+                              <span>
+                                <strong>{getDisplayName(sender)}</strong>
+                                <small>{message.text}</small>
+                              </span>
+                            </button>
+                          );
+                        })
+                      }
+                    </div>
+                  </aside>
+                )
+              }
             </>
           ) : (
             <div className="select-room-empty">

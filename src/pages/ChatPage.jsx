@@ -50,6 +50,8 @@ export default function ChatPage() {
 
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
+  const [viewingProfileUser, setViewingProfileUser] = useState(null);
+
   const roomNameRef = useRef();
 
   const selectedRoom = chatrooms.find((room) => room.id === selectedRoomId);
@@ -118,7 +120,9 @@ export default function ChatPage() {
         uid: currentUser.uid,
         email: currentUserProfile?.email || currentUser.email,
         username: currentUserProfile?.username,
-        photoURL: currentUserProfile?.photoURL
+        photoURL: currentUserProfile?.photoURL,
+        phoneNumber: currentUserProfile?.phoneNumber,
+        address: currentUserProfile?.address
       };
     }
 
@@ -126,24 +130,35 @@ export default function ChatPage() {
 
   }
 
-  function renderAvatar(user, className = "small-avatar") {
+  function renderAvatar(user, className = "small-avatar", options = {}) {
 
     const displayName = getDisplayName(user);
 
-    if (user?.photoURL) {
-      return (
+    const avatar = user?.photoURL ? (
         <img
           className={`${className} profile-image`}
           src={user.photoURL}
           alt={displayName}
         />
+      ) : (
+        <span className={className}>
+          {displayName.charAt(0).toUpperCase()}
+        </span>
       );
+
+    if (!options.onClick) {
+      return avatar;
     }
 
     return (
-      <span className={className}>
-        {displayName.charAt(0).toUpperCase()}
-      </span>
+      <button
+        className="avatar-button"
+        type="button"
+        aria-label={`View ${displayName} profile`}
+        onClick={options.onClick}
+      >
+        {avatar}
+      </button>
     );
   }
 
@@ -170,6 +185,20 @@ export default function ChatPage() {
     setIsProfileOpen(false);
 
     setProfileError("");
+
+  }
+
+  function handleOpenReadonlyProfile(user) {
+
+    if (!user || user.uid === currentUser.uid) return;
+
+    setViewingProfileUser(user);
+
+  }
+
+  function handleCloseReadonlyProfile() {
+
+    setViewingProfileUser(null);
 
   }
 
@@ -397,7 +426,9 @@ export default function ChatPage() {
                         className={`message-row ${isOwnMessage ? "own" : ""}`}
                         key={message.id}
                       >
-                        {renderAvatar(sender)}
+                        {renderAvatar(sender, "small-avatar", {
+                          onClick: isOwnMessage ? null : () => handleOpenReadonlyProfile(sender)
+                        })}
 
                         <div className="message-bubble">
                           <span className="message-sender">
@@ -500,7 +531,9 @@ export default function ChatPage() {
                   {
                     selectedRoomMembers.map((user) => (
                       <div className="member-chip" key={user.uid}>
-                        {renderAvatar(user)}
+                        {renderAvatar(user, "small-avatar", {
+                          onClick: () => handleOpenReadonlyProfile(user)
+                        })}
                         <span>
                           <strong>{getDisplayName(user)}</strong>
                           <small>{user.email}</small>
@@ -657,6 +690,61 @@ export default function ChatPage() {
                   </button>
                 </div>
               </form>
+            </section>
+          </div>
+        )
+      }
+
+      {
+        viewingProfileUser && (
+          <div className="modal-backdrop" role="presentation" onMouseDown={handleCloseReadonlyProfile}>
+            <section
+              className="profile-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="readonly-profile-title"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <div>
+                  <p className="eyebrow">Member Profile</p>
+                  <h2 id="readonly-profile-title">View profile</h2>
+                </div>
+
+                <button className="modal-close" type="button" onClick={handleCloseReadonlyProfile}>
+                  Close
+                </button>
+              </div>
+
+              <div className="profile-preview readonly-profile-hero">
+                {renderAvatar(viewingProfileUser, "avatar profile-preview-avatar")}
+                <div>
+                  <strong>{getDisplayName(viewingProfileUser)}</strong>
+                  <small>{viewingProfileUser.email || "Not provided"}</small>
+                </div>
+              </div>
+
+              <div className="readonly-profile-details">
+                <div className="profile-detail-row">
+                  <span>Username</span>
+                  <strong>{viewingProfileUser.username || "Not provided"}</strong>
+                </div>
+
+                <div className="profile-detail-row">
+                  <span>Email</span>
+                  <strong>{viewingProfileUser.email || "Not provided"}</strong>
+                </div>
+
+                <div className="profile-detail-row">
+                  <span>Phone number</span>
+                  <strong>{viewingProfileUser.phoneNumber || "Not provided"}</strong>
+                </div>
+
+                <div className="profile-detail-row">
+                  <span>Address</span>
+                  <strong>{viewingProfileUser.address || "Not provided"}</strong>
+                </div>
+              </div>
             </section>
           </div>
         )

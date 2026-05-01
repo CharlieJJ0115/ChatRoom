@@ -268,7 +268,6 @@ h3 {
 
 .chat-tools .tool-panel {
   display: flex;
-  flex: 1;
   flex-direction: column;
 }
 
@@ -520,11 +519,27 @@ h3 {
   line-height: 1.2;
 }
 
-.member-count {
+.member-count,
+.member-count-button {
   flex: 0 0 auto;
   color: var(--muted);
   font-size: 13px;
   font-weight: 700;
+}
+
+.member-count-button {
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.member-count-button:hover {
+  color: #ffffff;
+  background: var(--accent);
+  transform: translateY(-1px);
 }
 
 .message-list {
@@ -743,6 +758,10 @@ h3 {
   box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
 }
 
+.members-modal {
+  width: min(560px, 100%);
+}
+
 .modal-header {
   display: flex;
   align-items: center;
@@ -821,6 +840,24 @@ h3 {
 .modal-actions .primary-button,
 .modal-actions .secondary-button {
   margin-top: 0;
+}
+
+.members-modal-body {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.members-modal-list {
+  flex: 0 0 auto;
+  max-height: 38vh;
+  overflow-y: auto;
+}
+
+.members-modal-invite {
+  overflow-y: visible;
 }
 
 .readonly-profile-details {
@@ -996,14 +1033,6 @@ h3 {
     min-height: 0;
   }
 
-  .chat-tools .tool-panel:first-child {
-    flex: 0.95;
-  }
-
-  .chat-tools .tool-panel:last-child {
-    flex: 1.05;
-  }
-
   .profile-panel,
   .room-list-panel,
   .tool-panel {
@@ -1021,6 +1050,7 @@ h3 {
   }
 
   .member-count,
+  .member-count-button,
   .eyebrow,
   .profile-label {
     font-size: 11px;
@@ -1105,6 +1135,7 @@ h3 {
 
   .modal-header,
   .profile-form,
+  .members-modal-body,
   .readonly-profile-details {
     padding: 14px;
   }

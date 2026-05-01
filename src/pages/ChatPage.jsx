@@ -52,6 +52,8 @@ export default function ChatPage() {
 
   const [viewingProfileUser, setViewingProfileUser] = useState(null);
 
+  const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
+
   const roomNameRef = useRef();
 
   const selectedRoom = chatrooms.find((room) => room.id === selectedRoomId);
@@ -199,6 +201,20 @@ export default function ChatPage() {
   function handleCloseReadonlyProfile() {
 
     setViewingProfileUser(null);
+
+  }
+
+  function handleOpenMembersModal() {
+
+    if (!selectedRoom) return;
+
+    setIsMembersModalOpen(true);
+
+  }
+
+  function handleCloseMembersModal() {
+
+    setIsMembersModalOpen(false);
 
   }
 
@@ -398,9 +414,13 @@ export default function ChatPage() {
                   <h2>{selectedRoom.name}</h2>
                 </div>
 
-                <span className="member-count">
+                <button
+                  className="member-count-button"
+                  type="button"
+                  onClick={handleOpenMembersModal}
+                >
                   {selectedRoom.members?.length || 0} members
-                </span>
+                </button>
               </header>
 
               <div className="message-list">
@@ -511,85 +531,6 @@ export default function ChatPage() {
           </button>
         </section>
 
-        <section className="tool-panel">
-          <div className="section-heading">
-            <h2>Room Members</h2>
-          </div>
-
-          {
-            selectedRoom ? (
-              <>
-                <div className="member-list">
-                  <div className="member-chip">
-                    {renderAvatar(currentDisplayProfile)}
-                    <span>
-                      <strong>{getDisplayName(currentDisplayProfile)}</strong>
-                      <small>{currentDisplayProfile.email}</small>
-                    </span>
-                  </div>
-
-                  {
-                    selectedRoomMembers.map((user) => (
-                      <div className="member-chip" key={user.uid}>
-                        {renderAvatar(user, "small-avatar", {
-                          onClick: () => handleOpenReadonlyProfile(user)
-                        })}
-                        <span>
-                          <strong>{getDisplayName(user)}</strong>
-                          <small>{user.email}</small>
-                        </span>
-                      </div>
-                    ))
-                  }
-                </div>
-
-                <div className="invite-panel">
-                  <h3>Add More Members</h3>
-
-                  {
-                    availableInviteUsers.length === 0 ? (
-                      <p className="empty-copy">
-                        All registered users are already in this room.
-                      </p>
-                    ) : (
-                      <>
-                        {
-                          availableInviteUsers.map((user) => (
-                            <label className="member-option" key={user.uid}>
-                              <input
-                                type="checkbox"
-                                checked={inviteUserIds.includes(user.uid)}
-                                onChange={() => handleSelectInviteUser(user.uid)}
-                              />
-
-                              {renderAvatar(user)}
-
-                              <span>
-                                <strong>{getDisplayName(user)}</strong>
-                                <small>{user.email}</small>
-                              </span>
-                            </label>
-                          ))
-                        }
-
-                        <button
-                          className="secondary-button"
-                          type="button"
-                          onClick={handleAddMembers}
-                          disabled={inviteUserIds.length === 0}
-                        >
-                          Add Members
-                        </button>
-                      </>
-                    )
-                  }
-                </div>
-              </>
-            ) : (
-              <p className="empty-copy">Select a chatroom to see members.</p>
-            )
-          }
-        </section>
       </aside>
 
       {
@@ -690,6 +631,99 @@ export default function ChatPage() {
                   </button>
                 </div>
               </form>
+            </section>
+          </div>
+        )
+      }
+
+      {
+        isMembersModalOpen && selectedRoom && (
+          <div className="modal-backdrop" role="presentation" onMouseDown={handleCloseMembersModal}>
+            <section
+              className="profile-modal members-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="members-modal-title"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <div>
+                  <p className="eyebrow">Current Chatroom</p>
+                  <h2 id="members-modal-title">Room Members</h2>
+                </div>
+
+                <button className="modal-close" type="button" onClick={handleCloseMembersModal}>
+                  Close
+                </button>
+              </div>
+
+              <div className="members-modal-body">
+                <div className="member-list members-modal-list">
+                  <div className="member-chip">
+                    {renderAvatar(currentDisplayProfile)}
+                    <span>
+                      <strong>{getDisplayName(currentDisplayProfile)}</strong>
+                      <small>{currentDisplayProfile.email}</small>
+                    </span>
+                  </div>
+
+                  {
+                    selectedRoomMembers.map((user) => (
+                      <div className="member-chip" key={user.uid}>
+                        {renderAvatar(user, "small-avatar", {
+                          onClick: () => handleOpenReadonlyProfile(user)
+                        })}
+                        <span>
+                          <strong>{getDisplayName(user)}</strong>
+                          <small>{user.email}</small>
+                        </span>
+                      </div>
+                    ))
+                  }
+                </div>
+
+                <div className="invite-panel members-modal-invite">
+                  <h3>Add More Members</h3>
+
+                  {
+                    availableInviteUsers.length === 0 ? (
+                      <p className="empty-copy">
+                        All registered users are already in this room.
+                      </p>
+                    ) : (
+                      <>
+                        {
+                          availableInviteUsers.map((user) => (
+                            <label className="member-option" key={user.uid}>
+                              <input
+                                type="checkbox"
+                                checked={inviteUserIds.includes(user.uid)}
+                                onChange={() => handleSelectInviteUser(user.uid)}
+                              />
+
+                              {renderAvatar(user)}
+
+                              <span>
+                                <strong>{getDisplayName(user)}</strong>
+                                <small>{user.email}</small>
+                              </span>
+                            </label>
+                          ))
+                        }
+
+                        <button
+                          className="secondary-button"
+                          type="button"
+                          onClick={handleAddMembers}
+                          disabled={inviteUserIds.length === 0}
+                        >
+                          Add Members
+                        </button>
+                      </>
+                    )
+                  }
+                </div>
+              </div>
             </section>
           </div>
         )

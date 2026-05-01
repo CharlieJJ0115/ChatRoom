@@ -5,8 +5,10 @@ import useAuth from "../hooks/useAuth";
 import {
   addMembersToChatroom,
   createChatroom,
+  editMessage,
   sendMessage,
-  subscribeMessages
+  subscribeMessages,
+  unsendMessage
 } from "../firebase/chatroomService";
 
 import {
@@ -41,6 +43,14 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([]);
 
   const [messageText, setMessageText] = useState("");
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [editingMessageId, setEditingMessageId] = useState(null);
+
+  const [editingMessageText, setEditingMessageText] = useState("");
+
+  const [messageActionError, setMessageActionError] = useState("");
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -305,6 +315,14 @@ export default function ChatPage() {
 
     setInviteUserIds([]);
 
+    setSearchQuery("");
+
+    setEditingMessageId(null);
+
+    setEditingMessageText("");
+
+    setMessageActionError("");
+
   }
 
   function handleSelectInviteUser(uid) {
@@ -344,9 +362,97 @@ export default function ChatPage() {
 
   }
 
+  function handleStartEditMessage(message) {
+
+    setEditingMessageId(message.id);
+
+    setEditingMessageText(message.text || "");
+
+    setMessageActionError("");
+
+  }
+
+  function handleCancelEditMessage() {
+
+    setEditingMessageId(null);
+
+    setEditingMessageText("");
+
+    setMessageActionError("");
+
+  }
+
+  async function handleSaveEditMessage(e, messageId) {
+
+    e.preventDefault();
+
+    if (!selectedRoom || !editingMessageText.trim()) {
+      setMessageActionError("Message cannot be empty.");
+      return;
+    }
+
+    try {
+      setMessageActionError("");
+
+      await editMessage(selectedRoom.id, messageId, editingMessageText);
+
+      setEditingMessageId(null);
+
+      setEditingMessageText("");
+    } catch (err) {
+      setMessageActionError(err.message);
+    }
+  }
+
+  async function handleUnsendMessage(message) {
+
+    if (!selectedRoom || !message || message.senderId !== currentUser.uid) return;
+
+    const confirmed = window.confirm("Unsend this message?");
+
+    if (!confirmed) return;
+
+    try {
+      setMessageActionError("");
+
+      await unsendMessage(selectedRoom.id, message.id);
+
+      if (editingMessageId === message.id) {
+        setEditingMessageId(null);
+        setEditingMessageText("");
+      }
+    } catch (err) {
+      setMessageActionError(err.message);
+    }
+  }
+
   const currentDisplayProfile = getUserById(currentUser.uid);
 
   const visibleMemberCount = selectedRoom ? validRoomMembers.length : 0;
+
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+
+  const filteredMessages = normalizedSearchQuery
+    ? messages.filter((message) => {
+        if (message.isUnsent) return false;
+
+        const sender = getUserById(message.senderId) || {
+          email: message.senderEmail,
+          username: message.senderEmail
+        };
+
+        const searchableText = [
+          message.text,
+          getDisplayName(sender),
+          sender?.email
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(normalizedSearchQuery);
+      })
+    : messages;
 
   return (
     <main className="chat-app">
@@ -429,7 +535,18 @@ export default function ChatPage() {
                 </button>
               </header>
 
+              <div className="message-search">
+                <input
+                  type="search"
+                  placeholder="Search messages"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
               <div className="message-list">
+                {messageActionError && <p className="form-error">{messageActionError}</p>}
+
                 {
                   messages.length === 0 && (
                     <div className="center-empty">
@@ -440,12 +557,22 @@ export default function ChatPage() {
                 }
 
                 {
-                  messages.map((message) => {
+                  messages.length > 0 && filteredMessages.length === 0 && (
+                    <div className="center-empty">
+                      <h3>No matching messages</h3>
+                      <p>Clear the search field to show every message.</p>
+                    </div>
+                  )
+                }
+
+                {
+                  filteredMessages.map((message) => {
                     const sender = getUserById(message.senderId) || {
                       email: message.senderEmail,
                       username: message.senderEmail
                     };
                     const isOwnMessage = message.senderId === currentUser.uid;
+                    const canOperateMessage = isOwnMessage && !message.isUnsent && message.type === "text";
 
                     return (
                       <article
@@ -460,7 +587,47 @@ export default function ChatPage() {
                           <span className="message-sender">
                             {getDisplayName(sender)}
                           </span>
-                          <p>{message.text}</p>
+
+                          {
+                            message.isUnsent ? (
+                              <p className="message-unsent">This message was unsent.</p>
+                            ) : editingMessageId === message.id ? (
+                              <form
+                                className="edit-message-form"
+                                onSubmit={(e) => handleSaveEditMessage(e, message.id)}
+                              >
+                                <input
+                                  type="text"
+                                  value={editingMessageText}
+                                  onChange={(e) => setEditingMessageText(e.target.value)}
+                                  autoFocus
+                                />
+
+                                <div className="edit-message-actions">
+                                  <button type="submit">Save</button>
+                                  <button type="button" onClick={handleCancelEditMessage}>
+                                    Cancel
+                                  </button>
+                                </div>
+                              </form>
+                            ) : (
+                              <p>{message.text}</p>
+                            )
+                          }
+
+                          {
+                            canOperateMessage && editingMessageId !== message.id && (
+                              <div className="message-actions">
+                                <button type="button" onClick={() => handleStartEditMessage(message)}>
+                                  Edit
+                                </button>
+
+                                <button type="button" onClick={() => handleUnsendMessage(message)}>
+                                  Unsend
+                                </button>
+                              </div>
+                            )
+                          }
                         </div>
                       </article>
                     );

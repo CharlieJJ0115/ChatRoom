@@ -64,13 +64,47 @@ export async function sendMessage(roomId, user, text) {
 
     type: "text",
 
-    createdAt: serverTimestamp()
+    isUnsent: false,
+
+    createdAt: serverTimestamp(),
+
+    updatedAt: serverTimestamp()
 
   });
 
   await updateDoc(doc(db, "chatrooms", roomId), {
 
     lastMessage: messageText,
+
+    updatedAt: serverTimestamp()
+
+  });
+}
+
+export async function editMessage(roomId, messageId, text) {
+
+  const messageText = text.trim();
+
+  if (!roomId || !messageId || !messageText) return;
+
+  await updateDoc(doc(db, "chatrooms", roomId, "messages", messageId), {
+
+    text: messageText,
+
+    updatedAt: serverTimestamp()
+
+  });
+}
+
+export async function unsendMessage(roomId, messageId) {
+
+  if (!roomId || !messageId) return;
+
+  await updateDoc(doc(db, "chatrooms", roomId, "messages", messageId), {
+
+    text: "",
+
+    isUnsent: true,
 
     updatedAt: serverTimestamp()
 

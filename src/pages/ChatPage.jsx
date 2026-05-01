@@ -62,6 +62,10 @@ export default function ChatPage() {
 
   const selectableUsers = users.filter((user) => user.uid !== currentUser?.uid);
 
+  const validRoomMembers = selectedRoom
+    ? users.filter((user) => selectedRoom.members?.includes(user.uid))
+    : [];
+
   const selectedRoomMembers = selectedRoom
     ? selectableUsers.filter((user) => selectedRoom.members?.includes(user.uid))
     : [];
@@ -342,6 +346,8 @@ export default function ChatPage() {
 
   const currentDisplayProfile = getUserById(currentUser.uid);
 
+  const visibleMemberCount = selectedRoom ? validRoomMembers.length : 0;
+
   return (
     <main className="chat-app">
 
@@ -419,7 +425,7 @@ export default function ChatPage() {
                   type="button"
                   onClick={handleOpenMembersModal}
                 >
-                  {selectedRoom.members?.length || 0} members
+                  {visibleMemberCount} members
                 </button>
               </header>
 
@@ -659,13 +665,17 @@ export default function ChatPage() {
 
               <div className="members-modal-body">
                 <div className="member-list members-modal-list">
-                  <div className="member-chip">
-                    {renderAvatar(currentDisplayProfile)}
-                    <span>
-                      <strong>{getDisplayName(currentDisplayProfile)}</strong>
-                      <small>{currentDisplayProfile.email}</small>
-                    </span>
-                  </div>
+                  {
+                    currentUserProfile && (
+                      <div className="member-chip">
+                        {renderAvatar(currentDisplayProfile)}
+                        <span>
+                          <strong>{getDisplayName(currentDisplayProfile)}</strong>
+                          <small>{currentDisplayProfile.email}</small>
+                        </span>
+                      </div>
+                    )
+                  }
 
                   {
                     selectedRoomMembers.map((user) => (

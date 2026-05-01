@@ -6,6 +6,7 @@ import {
   addMembersToChatroom,
   createChatroom,
   editMessage,
+  sendImageMessage,
   sendMessage,
   subscribeMessages,
   unsendMessage
@@ -25,6 +26,8 @@ const emptyProfileForm = {
   phoneNumber: "",
   address: ""
 };
+
+const maxImageSizeBytes = 750 * 1024;
 
 export default function ChatPage() {
 
@@ -56,6 +59,8 @@ export default function ChatPage() {
 
   const [messageActionError, setMessageActionError] = useState("");
 
+  const [isSendingImage, setIsSendingImage] = useState(false);
+
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const [profileForm, setProfileForm] = useState(emptyProfileForm);
@@ -71,6 +76,8 @@ export default function ChatPage() {
   const roomNameRef = useRef();
 
   const messageRefs = useRef({});
+
+  const imageInputRef = useRef();
 
   const selectedRoom = chatrooms.find((room) => room.id === selectedRoomId);
 
@@ -409,6 +416,76 @@ export default function ChatPage() {
 
   }
 
+  function readImageFile(file) {
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleSendImageFile(file) {
+
+    if (!selectedRoom || !file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setMessageActionError("Please choose an image file.");
+      return;
+    }
+
+    if (file.size > maxImageSizeBytes) {
+      setMessageActionError("Image must be 750KB or smaller.");
+      return;
+    }
+
+    try {
+      setIsSendingImage(true);
+      setMessageActionError("");
+
+      const imageData = await readImageFile(file);
+
+      await sendImageMessage(selectedRoom.id, currentUser, {
+        imageData,
+        imageName: file.name || "Pasted image",
+        imageSize: file.size
+      });
+    } catch (err) {
+      setMessageActionError(err.message);
+    } finally {
+      setIsSendingImage(false);
+    }
+  }
+
+  function handleSelectImage(e) {
+
+    const file = e.target.files?.[0];
+
+    handleSendImageFile(file);
+
+    e.target.value = "";
+
+  }
+
+  function handlePasteMessage(e) {
+
+    const imageItem = Array.from(e.clipboardData?.items || [])
+      .find((item) => item.type.startsWith("image/"));
+
+    if (!imageItem) return;
+
+    const file = imageItem.getAsFile();
+
+    if (!file) return;
+
+    e.preventDefault();
+
+    handleSendImageFile(file);
+
+  }
+
   function handleStartEditMessage(message) {
 
     setEditingMessageId(message.id);
@@ -490,6 +567,7 @@ export default function ChatPage() {
 
         const searchableText = [
           message.text,
+          message.type === "image" ? "Image message" : "",
           getDisplayName(sender),
           sender?.email
         ]
@@ -611,7 +689,8 @@ export default function ChatPage() {
                       username: message.senderEmail
                     };
                     const isOwnMessage = message.senderId === currentUser.uid;
-                    const canOperateMessage = isOwnMessage && !message.isUnsent && message.type === "text";
+                    const canEditMessage = isOwnMessage && !message.isUnsent && message.type === "text";
+                    const canUnsendMessage = isOwnMessage && !message.isUnsent;
 
                     return (
                       <article
@@ -635,6 +714,12 @@ export default function ChatPage() {
                           {
                             message.isUnsent ? (
                               <p className="message-unsent">This message was unsent.</p>
+                            ) : message.type === "image" ? (
+                              <img
+                                className="message-image"
+                                src={message.imageData}
+                                alt={message.imageName || "Sent image"}
+                              />
                             ) : editingMessageId === message.id ? (
                               <form
                                 className="edit-message-form"
@@ -660,11 +745,15 @@ export default function ChatPage() {
                           }
 
                           {
-                            canOperateMessage && editingMessageId !== message.id && (
+                            canUnsendMessage && editingMessageId !== message.id && (
                               <div className="message-actions">
-                                <button type="button" onClick={() => handleStartEditMessage(message)}>
-                                  Edit
-                                </button>
+                                {
+                                  canEditMessage && (
+                                    <button type="button" onClick={() => handleStartEditMessage(message)}>
+                                      Edit
+                                    </button>
+                                  )
+                                }
 
                                 <button type="button" onClick={() => handleUnsendMessage(message)}>
                                   Unsend
@@ -681,13 +770,32 @@ export default function ChatPage() {
 
               <form className="message-form" onSubmit={handleSendMessage}>
                 <input
+                  type="file"
+                  accept="image/*"
+                  ref={imageInputRef}
+                  onChange={handleSelectImage}
+                  hidden
+                />
+
+                <button
+                  className="image-upload-button"
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={isSendingImage}
+                >
+                  {isSendingImage ? "Uploading..." : "Image"}
+                </button>
+
+                <input
                   type="text"
                   placeholder="Type a message"
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
+                  onPaste={handlePasteMessage}
+                  disabled={isSendingImage}
                 />
 
-                <button type="submit">
+                <button type="submit" disabled={isSendingImage}>
                   Send
                 </button>
               </form>
@@ -751,7 +859,7 @@ export default function ChatPage() {
 
                               <span>
                                 <strong>{getDisplayName(sender)}</strong>
-                                <small>{message.text}</small>
+                                <small>{message.type === "image" ? "Image message" : message.text}</small>
                               </span>
                             </button>
                           );

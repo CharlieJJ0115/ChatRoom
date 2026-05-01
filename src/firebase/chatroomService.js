@@ -81,6 +81,43 @@ export async function sendMessage(roomId, user, text) {
   });
 }
 
+export async function sendImageMessage(roomId, user, imagePayload) {
+
+  if (!roomId || !user || !imagePayload?.imageData) return;
+
+  await addDoc(collection(db, "chatrooms", roomId, "messages"), {
+
+    text: "",
+
+    imageData: imagePayload.imageData,
+
+    imageName: imagePayload.imageName,
+
+    imageSize: imagePayload.imageSize,
+
+    senderId: user.uid,
+
+    senderEmail: user.email,
+
+    type: "image",
+
+    isUnsent: false,
+
+    createdAt: serverTimestamp(),
+
+    updatedAt: serverTimestamp()
+
+  });
+
+  await updateDoc(doc(db, "chatrooms", roomId), {
+
+    lastMessage: "Sent an image",
+
+    updatedAt: serverTimestamp()
+
+  });
+}
+
 export async function editMessage(roomId, messageId, text) {
 
   const messageText = text.trim();
@@ -103,6 +140,8 @@ export async function unsendMessage(roomId, messageId) {
   await updateDoc(doc(db, "chatrooms", roomId, "messages", messageId), {
 
     text: "",
+
+    imageData: "",
 
     isUnsent: true,
 

@@ -638,6 +638,13 @@ h3 {
   line-height: 1.45;
 }
 
+.message-image {
+  max-width: min(320px, 100%);
+  max-height: 320px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
 .message-unsent {
   color: var(--muted);
   font-style: italic;
@@ -813,7 +820,7 @@ h3 {
   background: var(--panel);
 }
 
-.message-form input,
+.message-form input:not([type="file"]),
 .room-name-input {
   width: 100%;
   min-width: 0;
@@ -824,7 +831,7 @@ h3 {
   outline: none;
 }
 
-.message-form input {
+.message-form input:not([type="file"]) {
   padding: 12px 14px;
 }
 
@@ -832,7 +839,7 @@ h3 {
   padding: 11px 12px;
 }
 
-.message-form input:focus,
+.message-form input:not([type="file"]):focus,
 .room-name-input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
@@ -841,6 +848,17 @@ h3 {
 .message-form button,
 .primary-button {
   padding: 0 18px;
+  color: #ffffff;
+  background: var(--accent);
+}
+
+.message-form .image-upload-button {
+  flex: 0 0 auto;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.message-form .image-upload-button:hover:not(:disabled) {
   color: #ffffff;
   background: var(--accent);
 }
@@ -1284,13 +1302,13 @@ h3 {
     flex-direction: row;
   }
 
-  .message-form input {
+  .message-form input:not([type="file"]) {
     padding: 10px;
   }
 
   .message-form button {
     min-height: 40px;
-    padding: 0 12px;
+    padding: 0 10px;
   }
 
   .message-bubble {

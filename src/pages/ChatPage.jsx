@@ -9,9 +9,20 @@ import {
   subscribeMessages
 } from "../firebase/chatroomService";
 
-import { subscribeUsers } from "../firebase/userService";
+import {
+  subscribeUsers,
+  updateUserProfile
+} from "../firebase/userService";
 
 import useChatrooms from "../hooks/useChatrooms";
+
+const emptyProfileForm = {
+  photoURL: "",
+  username: "",
+  email: "",
+  phoneNumber: "",
+  address: ""
+};
 
 export default function ChatPage() {
 
@@ -31,29 +42,35 @@ export default function ChatPage() {
 
   const [messageText, setMessageText] = useState("");
 
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const [profileForm, setProfileForm] = useState(emptyProfileForm);
+
+  const [profileError, setProfileError] = useState("");
+
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
   const roomNameRef = useRef();
 
   const selectedRoom = chatrooms.find((room) => room.id === selectedRoomId);
 
+  const currentUserProfile = users.find((user) => user.uid === currentUser?.uid);
+
+  const selectableUsers = users.filter((user) => user.uid !== currentUser?.uid);
+
   const selectedRoomMembers = selectedRoom
-    ? users.filter((user) => selectedRoom.members?.includes(user.uid))
+    ? selectableUsers.filter((user) => selectedRoom.members?.includes(user.uid))
     : [];
 
   const availableInviteUsers = selectedRoom
-    ? users.filter((user) => !selectedRoom.members?.includes(user.uid))
+    ? selectableUsers.filter((user) => !selectedRoom.members?.includes(user.uid))
     : [];
 
   useEffect(() => {
 
     if (!currentUser) return;
 
-    const unsubscribe = subscribeUsers((userList) => {
-
-      setUsers(
-        userList.filter((user) => user.uid !== currentUser.uid)
-      );
-
-    });
+    const unsubscribe = subscribeUsers(setUsers);
 
     return unsubscribe;
 
@@ -75,10 +92,127 @@ export default function ChatPage() {
 
   }
 
+  function getProfileFallback() {
+
+    const email = currentUserProfile?.email || currentUser.email || "";
+
+    return {
+      photoURL: currentUserProfile?.photoURL || "",
+      username: currentUserProfile?.username || email.split("@")[0] || "",
+      email,
+      phoneNumber: currentUserProfile?.phoneNumber || "",
+      address: currentUserProfile?.address || ""
+    };
+  }
+
+  function getDisplayName(user) {
+
+    return user?.username || user?.email || currentUser.email || "User";
+
+  }
+
+  function getUserById(uid) {
+
+    if (uid === currentUser.uid) {
+      return {
+        uid: currentUser.uid,
+        email: currentUserProfile?.email || currentUser.email,
+        username: currentUserProfile?.username,
+        photoURL: currentUserProfile?.photoURL
+      };
+    }
+
+    return users.find((user) => user.uid === uid);
+
+  }
+
+  function renderAvatar(user, className = "small-avatar") {
+
+    const displayName = getDisplayName(user);
+
+    if (user?.photoURL) {
+      return (
+        <img
+          className={`${className} profile-image`}
+          src={user.photoURL}
+          alt={displayName}
+        />
+      );
+    }
+
+    return (
+      <span className={className}>
+        {displayName.charAt(0).toUpperCase()}
+      </span>
+    );
+  }
+
   async function handleLogout() {
 
     await logout();
 
+  }
+
+  function handleOpenProfile() {
+
+    setProfileForm(getProfileFallback());
+
+    setProfileError("");
+
+    setIsProfileOpen(true);
+
+  }
+
+  function handleCloseProfile() {
+
+    if (isSavingProfile) return;
+
+    setIsProfileOpen(false);
+
+    setProfileError("");
+
+  }
+
+  function handleProfileChange(e) {
+
+    const { name, value } = e.target;
+
+    setProfileForm((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+
+  }
+
+  async function handleSaveProfile(e) {
+
+    e.preventDefault();
+
+    const cleanedProfile = {
+      photoURL: profileForm.photoURL.trim(),
+      username: profileForm.username.trim(),
+      email: profileForm.email.trim(),
+      phoneNumber: profileForm.phoneNumber.trim(),
+      address: profileForm.address.trim()
+    };
+
+    if (!cleanedProfile.email) {
+      setProfileError("Email is required.");
+      return;
+    }
+
+    try {
+      setIsSavingProfile(true);
+      setProfileError("");
+
+      await updateUserProfile(currentUser.uid, cleanedProfile);
+
+      setIsProfileOpen(false);
+    } catch (err) {
+      setProfileError(err.message);
+    } finally {
+      setIsSavingProfile(false);
+    }
   }
 
   async function handleCreateRoom() {
@@ -161,24 +295,31 @@ export default function ChatPage() {
 
   }
 
+  const currentDisplayProfile = getUserById(currentUser.uid);
+
   return (
     <main className="chat-app">
 
       <aside className="chat-sidebar">
 
         <section className="profile-panel">
-          <div className="avatar">
-            {currentUser.email?.charAt(0).toUpperCase()}
-          </div>
+          {renderAvatar(currentDisplayProfile, "avatar")}
 
           <div className="profile-text">
             <p className="profile-label">Signed in as</p>
-            <h1>{currentUser.email}</h1>
+            <h1>{getDisplayName(currentDisplayProfile)}</h1>
+            <small>{currentDisplayProfile.email}</small>
           </div>
 
-          <button className="ghost-button" onClick={handleLogout}>
-            Logout
-          </button>
+          <div className="profile-actions">
+            <button className="ghost-button" type="button" onClick={handleOpenProfile}>
+              Edit Profile
+            </button>
+
+            <button className="ghost-button" type="button" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
         </section>
 
         <section className="room-list-panel">
@@ -245,6 +386,10 @@ export default function ChatPage() {
 
                 {
                   messages.map((message) => {
+                    const sender = getUserById(message.senderId) || {
+                      email: message.senderEmail,
+                      username: message.senderEmail
+                    };
                     const isOwnMessage = message.senderId === currentUser.uid;
 
                     return (
@@ -252,9 +397,11 @@ export default function ChatPage() {
                         className={`message-row ${isOwnMessage ? "own" : ""}`}
                         key={message.id}
                       >
+                        {renderAvatar(sender)}
+
                         <div className="message-bubble">
                           <span className="message-sender">
-                            {isOwnMessage ? "You" : message.senderEmail}
+                            {getDisplayName(sender)}
                           </span>
                           <p>{message.text}</p>
                         </div>
@@ -303,13 +450,13 @@ export default function ChatPage() {
             <h3>Add Members</h3>
 
             {
-              users.length === 0 && (
+              selectableUsers.length === 0 && (
                 <p className="empty-copy">No other registered users found.</p>
               )
             }
 
             {
-              users.map((user) => (
+              selectableUsers.map((user) => (
                 <label className="member-option" key={user.uid}>
                   <input
                     type="checkbox"
@@ -317,8 +464,10 @@ export default function ChatPage() {
                     onChange={() => handleSelectUser(user.uid)}
                   />
 
+                  {renderAvatar(user)}
+
                   <span>
-                    <strong>{user.username}</strong>
+                    <strong>{getDisplayName(user)}</strong>
                     <small>{user.email}</small>
                   </span>
                 </label>
@@ -341,23 +490,19 @@ export default function ChatPage() {
               <>
                 <div className="member-list">
                   <div className="member-chip">
-                    <span className="small-avatar">
-                      {currentUser.email?.charAt(0).toUpperCase()}
-                    </span>
+                    {renderAvatar(currentDisplayProfile)}
                     <span>
-                      <strong>You</strong>
-                      <small>{currentUser.email}</small>
+                      <strong>{getDisplayName(currentDisplayProfile)}</strong>
+                      <small>{currentDisplayProfile.email}</small>
                     </span>
                   </div>
 
                   {
                     selectedRoomMembers.map((user) => (
                       <div className="member-chip" key={user.uid}>
-                        <span className="small-avatar">
-                          {user.email?.charAt(0).toUpperCase()}
-                        </span>
+                        {renderAvatar(user)}
                         <span>
-                          <strong>{user.username}</strong>
+                          <strong>{getDisplayName(user)}</strong>
                           <small>{user.email}</small>
                         </span>
                       </div>
@@ -384,8 +529,10 @@ export default function ChatPage() {
                                 onChange={() => handleSelectInviteUser(user.uid)}
                               />
 
+                              {renderAvatar(user)}
+
                               <span>
-                                <strong>{user.username}</strong>
+                                <strong>{getDisplayName(user)}</strong>
                                 <small>{user.email}</small>
                               </span>
                             </label>
@@ -411,6 +558,109 @@ export default function ChatPage() {
           }
         </section>
       </aside>
+
+      {
+        isProfileOpen && (
+          <div className="modal-backdrop" role="presentation" onMouseDown={handleCloseProfile}>
+            <section
+              className="profile-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="profile-modal-title"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <div>
+                  <p className="eyebrow">User Profile</p>
+                  <h2 id="profile-modal-title">Edit profile</h2>
+                </div>
+
+                <button className="modal-close" type="button" onClick={handleCloseProfile}>
+                  Close
+                </button>
+              </div>
+
+              <div className="profile-preview">
+                {renderAvatar(profileForm, "avatar profile-preview-avatar")}
+                <div>
+                  <strong>{profileForm.username || profileForm.email || "User"}</strong>
+                  <small>{profileForm.email || "Profile email"}</small>
+                </div>
+              </div>
+
+              {profileError && <p className="form-error">{profileError}</p>}
+
+              <form className="profile-form" onSubmit={handleSaveProfile}>
+                <label className="field-group">
+                  <span>Profile picture URL</span>
+                  <input
+                    type="url"
+                    name="photoURL"
+                    placeholder="https://example.com/avatar.png"
+                    value={profileForm.photoURL}
+                    onChange={handleProfileChange}
+                  />
+                </label>
+
+                <label className="field-group">
+                  <span>Username</span>
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="Your display name"
+                    value={profileForm.username}
+                    onChange={handleProfileChange}
+                  />
+                </label>
+
+                <label className="field-group">
+                  <span>Email</span>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="you@example.com"
+                    value={profileForm.email}
+                    onChange={handleProfileChange}
+                    required
+                  />
+                </label>
+
+                <label className="field-group">
+                  <span>Phone number</span>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    placeholder="Phone number"
+                    value={profileForm.phoneNumber}
+                    onChange={handleProfileChange}
+                  />
+                </label>
+
+                <label className="field-group">
+                  <span>Address</span>
+                  <input
+                    type="text"
+                    name="address"
+                    placeholder="Address"
+                    value={profileForm.address}
+                    onChange={handleProfileChange}
+                  />
+                </label>
+
+                <div className="modal-actions">
+                  <button className="secondary-button" type="button" onClick={handleCloseProfile}>
+                    Cancel
+                  </button>
+
+                  <button className="primary-button" type="submit" disabled={isSavingProfile}>
+                    {isSavingProfile ? "Saving..." : "Save Profile"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        )
+      }
     </main>
   );
 }

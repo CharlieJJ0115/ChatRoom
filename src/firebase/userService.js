@@ -22,11 +22,34 @@ export async function createUserDocument(user) {
 
     photoURL: "",
 
+    phoneNumber: "",
+
+    address: "",
+
     blockedUsers: [],
 
     createdAt: serverTimestamp()
 
   });
+}
+
+export async function updateUserProfile(uid, profileData) {
+
+  await setDoc(doc(db, "users", uid), {
+
+    photoURL: profileData.photoURL,
+
+    username: profileData.username,
+
+    email: profileData.email,
+
+    phoneNumber: profileData.phoneNumber,
+
+    address: profileData.address,
+
+    updatedAt: serverTimestamp()
+
+  }, { merge: true });
 }
 
 export function subscribeUsers(callback) {

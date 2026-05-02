@@ -477,6 +477,12 @@ h3 {
   background: var(--accent-soft);
 }
 
+.room-item.unread .room-meta strong,
+.room-item.unread .room-meta small {
+  color: var(--text);
+  font-weight: 800;
+}
+
 .room-avatar {
   width: 40px;
   height: 40px;

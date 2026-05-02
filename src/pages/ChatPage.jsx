@@ -6,6 +6,7 @@ import {
   addMembersToChatroom,
   createChatroom,
   editMessage,
+  markChatroomRead,
   sendImageMessage,
   sendMessage,
   subscribeMessages,
@@ -166,6 +167,81 @@ export default function ChatPage() {
     }
 
     return users.find((user) => user.uid === uid);
+
+  }
+
+  function getTimestampMillis(timestamp) {
+
+    if (!timestamp) return 0;
+
+    if (typeof timestamp.toMillis === "function") {
+      return timestamp.toMillis();
+    }
+
+    if (timestamp instanceof Date) {
+      return timestamp.getTime();
+    }
+
+    return 0;
+
+  }
+
+  function getSenderDisplayName(senderId, senderEmail) {
+
+    if (senderId === currentUser.uid) {
+      return "You";
+    }
+
+    const sender = getUserById(senderId);
+
+    if (sender) {
+      return getDisplayName(sender);
+    }
+
+    return senderEmail?.split("@")[0] || "Someone";
+
+  }
+
+  function getRoomPreview(room) {
+
+    if (!room?.lastMessageSenderId) {
+      return room?.lastMessage || "No messages yet";
+    }
+
+    const senderName = getSenderDisplayName(
+      room.lastMessageSenderId,
+      room.lastMessageSenderEmail
+    );
+
+    if (room.lastMessageType === "image") {
+      return room.lastMessageSenderId === currentUser.uid
+        ? "You sent an image"
+        : `${senderName} sent an image`;
+    }
+
+    const messageText = room.lastMessageText || room.lastMessage || "";
+
+    if (!messageText) {
+      return "No messages yet";
+    }
+
+    return `${senderName}: ${messageText}`;
+
+  }
+
+  function isRoomUnread(room) {
+
+    if (!room?.lastMessageSenderId || room.lastMessageSenderId === currentUser.uid) {
+      return false;
+    }
+
+    const lastMessageTime = getTimestampMillis(room.lastMessageAt || room.updatedAt);
+
+    if (!lastMessageTime) return false;
+
+    const readTime = getTimestampMillis(room.readBy?.[currentUser.uid]);
+
+    return !readTime || lastMessageTime > readTime;
 
   }
 
@@ -453,7 +529,7 @@ export default function ChatPage() {
     });
   }
 
-  function handleSelectRoom(room) {
+  async function handleSelectRoom(room) {
 
     setMessages([]);
 
@@ -472,6 +548,12 @@ export default function ChatPage() {
     setEditingMessageText("");
 
     setMessageActionError("");
+
+    try {
+      await markChatroomRead(room.id, currentUser.uid);
+    } catch (err) {
+      setMessageActionError(err.message);
+    }
 
   }
 
@@ -748,7 +830,7 @@ export default function ChatPage() {
                 {
                   chatrooms.map((room) => (
                     <button
-                      className={`room-item ${selectedRoom?.id === room.id ? "active" : ""}`}
+                      className={`room-item ${selectedRoom?.id === room.id ? "active" : ""} ${isRoomUnread(room) ? "unread" : ""}`}
                       key={room.id}
                       onClick={() => handleSelectRoom(room)}
                     >
@@ -758,7 +840,7 @@ export default function ChatPage() {
 
                       <span className="room-meta">
                         <strong>{room.name}</strong>
-                        <small>{room.lastMessage || "No messages yet"}</small>
+                        <small>{getRoomPreview(room)}</small>
                       </span>
                     </button>
                   ))

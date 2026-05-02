@@ -13,6 +13,22 @@ export default function useChatrooms(uid) {
 
   const [chatrooms, setChatrooms] = useState([]);
 
+  function getTimestampMillis(timestamp) {
+
+    if (!timestamp) return 0;
+
+    if (typeof timestamp.toMillis === "function") {
+      return timestamp.toMillis();
+    }
+
+    if (timestamp instanceof Date) {
+      return timestamp.getTime();
+    }
+
+    return 0;
+
+  }
+
   useEffect(() => {
 
     if (!uid) return;
@@ -29,8 +45,15 @@ export default function useChatrooms(uid) {
         ...doc.data()
       }));
 
-      setChatrooms(roomList);
+      setChatrooms(roomList.sort((a, b) => {
+        const bTime = getTimestampMillis(b.updatedAt || b.lastMessageAt);
+        const aTime = getTimestampMillis(a.updatedAt || a.lastMessageAt);
 
+        return bTime - aTime;
+      }));
+
+    }, (error) => {
+      console.error("Failed to subscribe chatrooms", error);
     });
 
     return unsubscribe;

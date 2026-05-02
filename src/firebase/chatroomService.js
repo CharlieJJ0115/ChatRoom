@@ -30,7 +30,21 @@ export async function createChatroom(name, uid, memberUids = []) {
 
     updatedAt: serverTimestamp(),
 
-    lastMessage: ""
+    lastMessage: "",
+
+    lastMessageText: "",
+
+    lastMessageType: "",
+
+    lastMessageSenderId: "",
+
+    lastMessageSenderEmail: "",
+
+    lastMessageAt: null,
+
+    readBy: {
+      [uid]: serverTimestamp()
+    }
 
   });
 }
@@ -76,7 +90,19 @@ export async function sendMessage(roomId, user, text) {
 
     lastMessage: messageText,
 
-    updatedAt: serverTimestamp()
+    lastMessageText: messageText,
+
+    lastMessageType: "text",
+
+    lastMessageSenderId: user.uid,
+
+    lastMessageSenderEmail: user.email,
+
+    lastMessageAt: serverTimestamp(),
+
+    updatedAt: serverTimestamp(),
+
+    [`readBy.${user.uid}`]: serverTimestamp()
 
   });
 }
@@ -113,7 +139,30 @@ export async function sendImageMessage(roomId, user, imagePayload) {
 
     lastMessage: "Sent an image",
 
-    updatedAt: serverTimestamp()
+    lastMessageText: "",
+
+    lastMessageType: "image",
+
+    lastMessageSenderId: user.uid,
+
+    lastMessageSenderEmail: user.email,
+
+    lastMessageAt: serverTimestamp(),
+
+    updatedAt: serverTimestamp(),
+
+    [`readBy.${user.uid}`]: serverTimestamp()
+
+  });
+}
+
+export async function markChatroomRead(roomId, uid) {
+
+  if (!roomId || !uid) return;
+
+  await updateDoc(doc(db, "chatrooms", roomId), {
+
+    [`readBy.${uid}`]: serverTimestamp()
 
   });
 }

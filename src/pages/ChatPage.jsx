@@ -734,7 +734,7 @@ export default function ChatPage() {
 
                     return (
                       <article
-                        className={`message-row ${isOwnMessage ? "own" : ""} ${highlightedMessageId === message.id ? "highlighted" : ""}`}
+                        className={`message-row ${isOwnMessage ? "own" : ""} ${message.type === "image" && !message.isUnsent ? "image-message-row" : ""} ${highlightedMessageId === message.id ? "highlighted" : ""}`}
                         key={message.id}
                         ref={(element) => {
                           if (element) {

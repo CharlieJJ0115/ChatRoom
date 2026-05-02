@@ -634,8 +634,10 @@ h3 {
 .message-row.own .image-message-bubble {
   display: flex;
   width: fit-content;
+  max-width: min(320px, calc(100% - 48px));
   flex-direction: column;
   align-items: flex-start;
+  margin-right: auto;
   padding: 0;
   border: 0;
   color: var(--text);
@@ -644,6 +646,8 @@ h3 {
 
 .message-row.own .image-message-bubble {
   align-items: flex-end;
+  margin-right: 0;
+  margin-left: auto;
 }
 
 .message-row.own .small-avatar {
@@ -667,12 +671,18 @@ h3 {
 }
 
 .message-image-button {
-  display: block;
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
   border: 0;
   padding: 0;
   border-radius: 8px;
   background: transparent;
   cursor: zoom-in;
+}
+
+.message-row.own .image-message-bubble .message-image-button {
+  align-self: flex-end;
 }
 
 .message-image-button:focus-visible {
@@ -686,6 +696,8 @@ h3 {
 }
 
 .message-image {
+  display: block;
+  width: auto;
   max-width: min(320px, 100%);
   max-height: 320px;
   border: 1px solid rgba(148, 163, 184, 0.45);

@@ -1118,6 +1118,24 @@ h3 {
   margin-bottom: 0;
 }
 
+.profile-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-upload-row .secondary-button {
+  width: auto;
+  min-height: 40px;
+  margin-top: 0;
+  padding: 0 14px;
+}
+
+.profile-upload-row span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .modal-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1532,6 +1550,11 @@ h3 {
 
   .profile-preview {
     margin: 14px 14px 0;
+  }
+
+  .profile-upload-row {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .modal-actions {

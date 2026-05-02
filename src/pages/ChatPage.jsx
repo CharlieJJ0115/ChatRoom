@@ -83,6 +83,8 @@ export default function ChatPage() {
 
   const imageInputRef = useRef();
 
+  const profileImageInputRef = useRef();
+
   const selectedRoom = chatrooms.find((room) => room.id === selectedRoomId);
 
   const currentUserProfile = users.find((user) => user.uid === currentUser?.uid);
@@ -321,6 +323,38 @@ export default function ChatPage() {
       [name]: value
     }));
 
+  }
+
+  async function handleSelectProfileImage(e) {
+
+    const file = e.target.files?.[0];
+
+    e.target.value = "";
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setProfileError("Please choose an image file.");
+      return;
+    }
+
+    if (file.size > maxImageSizeBytes) {
+      setProfileError("Image must be 750KB or smaller.");
+      return;
+    }
+
+    try {
+      const imageData = await readImageFile(file);
+
+      setProfileForm((prev) => ({
+        ...prev,
+        photoURL: imageData
+      }));
+
+      setProfileError("");
+    } catch (err) {
+      setProfileError(err.message);
+    }
   }
 
   async function handleSaveProfile(e) {
@@ -1025,6 +1059,26 @@ export default function ChatPage() {
               {profileError && <p className="form-error">{profileError}</p>}
 
               <form className="profile-form" onSubmit={handleSaveProfile}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={profileImageInputRef}
+                  onChange={handleSelectProfileImage}
+                  hidden
+                />
+
+                <div className="profile-upload-row">
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => profileImageInputRef.current?.click()}
+                  >
+                    Upload Image
+                  </button>
+
+                  <span>Image file, max 750KB</span>
+                </div>
+
                 <label className="field-group">
                   <span>Profile picture URL</span>
                   <input

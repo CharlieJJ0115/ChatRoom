@@ -566,6 +566,10 @@ h3 {
   transform: translateY(-1px);
 }
 
+.mobile-back-button {
+  display: none;
+}
+
 .message-list {
   display: flex;
   min-height: 0;
@@ -1378,7 +1382,7 @@ h3 {
   .chat-app {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     gap: 8px;
     padding: 10px;
   }
@@ -1386,14 +1390,28 @@ h3 {
   .chat-sidebar {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-rows: auto auto;
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1fr);
     gap: 8px;
-    overflow: visible;
+    overflow: hidden;
   }
 
   .chat-main {
     grid-column: 1 / -1;
     min-height: 0;
+  }
+
+  .mobile-room-list .chat-main {
+    display: none;
+  }
+
+  .mobile-room-open .chat-sidebar {
+    display: none;
+  }
+
+  .mobile-room-open .chat-main {
+    display: flex;
+    height: calc(100vh - 20px);
   }
 
   .create-room-trigger {
@@ -1411,7 +1429,7 @@ h3 {
   }
 
   .room-list-panel {
-    max-height: 150px;
+    max-height: none;
   }
 
   .chat-header,
@@ -1424,6 +1442,21 @@ h3 {
   .chat-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .mobile-back-button {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    border: 0;
+    border-radius: 8px;
+    padding: 0 12px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    font-size: 13px;
+    font-weight: 800;
   }
 
   .chat-header-actions {

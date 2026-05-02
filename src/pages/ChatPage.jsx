@@ -445,6 +445,28 @@ export default function ChatPage() {
 
   }
 
+  function handleBackToRooms() {
+
+    setMessages([]);
+
+    setSelectedRoomId(null);
+
+    setInviteUserIds([]);
+
+    setSearchQuery("");
+
+    setIsSearchPanelOpen(false);
+
+    setHighlightedMessageId(null);
+
+    setEditingMessageId(null);
+
+    setEditingMessageText("");
+
+    setMessageActionError("");
+
+  }
+
   function handleSelectInviteUser(uid) {
 
     setInviteUserIds((prev) => {
@@ -646,7 +668,7 @@ export default function ChatPage() {
     : [];
 
   return (
-    <main className="chat-app">
+    <main className={`chat-app ${selectedRoom ? "mobile-room-open" : "mobile-room-list"}`}>
 
       <aside className="chat-sidebar">
 
@@ -721,6 +743,14 @@ export default function ChatPage() {
             <>
               <header className="chat-header">
                 <div>
+                  <button
+                    className="mobile-back-button"
+                    type="button"
+                    onClick={handleBackToRooms}
+                  >
+                    Back to Chatrooms
+                  </button>
+
                   <p className="eyebrow">Current Chatroom</p>
                   <h2>{selectedRoom.name}</h2>
                 </div>

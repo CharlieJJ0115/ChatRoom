@@ -630,6 +630,14 @@ h3 {
   background: var(--accent);
 }
 
+.image-message-bubble,
+.message-row.own .image-message-bubble {
+  padding: 0;
+  border: 0;
+  color: var(--text);
+  background: transparent;
+}
+
 .message-row.own .small-avatar {
   order: 2;
 }
@@ -644,6 +652,10 @@ h3 {
 
 .message-row.own .message-sender {
   color: rgba(255, 255, 255, 0.78);
+}
+
+.message-row.own .image-message-bubble .message-sender {
+  color: var(--muted);
 }
 
 .message-bubble p {

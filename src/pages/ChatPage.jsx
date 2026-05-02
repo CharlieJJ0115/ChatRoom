@@ -730,7 +730,7 @@ export default function ChatPage() {
                           onClick: isOwnMessage ? null : () => handleOpenReadonlyProfile(sender)
                         })}
 
-                        <div className="message-bubble">
+                        <div className={`message-bubble ${message.type === "image" && !message.isUnsent ? "image-message-bubble" : ""}`}>
                           <span className="message-sender">
                             {getDisplayName(sender)}
                           </span>

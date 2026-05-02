@@ -743,6 +743,32 @@ export default function ChatPage() {
 
   async function handleSelectRoom(room) {
 
+    const isSameRoom = room.id === selectedRoomId;
+
+    if (isSameRoom) {
+      setInviteUserIds([]);
+
+      setSearchQuery("");
+
+      setIsSearchPanelOpen(false);
+
+      setHighlightedMessageId(null);
+
+      setEditingMessageId(null);
+
+      setEditingMessageText("");
+
+      setMessageActionError("");
+
+      try {
+        await markChatroomRead(room.id, currentUser.uid);
+      } catch (err) {
+        setMessageActionError(err.message);
+      }
+
+      return;
+    }
+
     shouldScrollToBottomOnLoadRef.current = true;
 
     setMessages([]);

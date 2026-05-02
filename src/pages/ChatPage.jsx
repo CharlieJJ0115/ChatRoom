@@ -86,6 +86,8 @@ export default function ChatPage() {
 
   const messageListRef = useRef();
 
+  const shouldScrollToBottomOnLoadRef = useRef(false);
+
   const imageInputRef = useRef();
 
   const profileImageInputRef = useRef();
@@ -127,6 +129,16 @@ export default function ChatPage() {
     return unsubscribe;
 
   }, [selectedRoomId]);
+
+  useEffect(() => {
+
+    if (!selectedRoomId || !shouldScrollToBottomOnLoadRef.current) return;
+
+    jumpMessagesToBottom();
+
+    shouldScrollToBottomOnLoadRef.current = false;
+
+  }, [messages.length, selectedRoomId]);
 
   if (!currentUser) {
 
@@ -342,18 +354,15 @@ export default function ChatPage() {
 
   }
 
-  function scrollMessagesToBottom() {
+  function jumpMessagesToBottom(delay = 100) {
 
     window.setTimeout(() => {
       const messageListElement = messageListRef.current;
 
       if (!messageListElement) return;
 
-      messageListElement.scrollTo({
-        top: messageListElement.scrollHeight,
-        behavior: "smooth"
-      });
-    }, 50);
+      messageListElement.scrollTop = messageListElement.scrollHeight;
+    }, delay);
 
   }
 
@@ -531,6 +540,8 @@ export default function ChatPage() {
 
   async function handleSelectRoom(room) {
 
+    shouldScrollToBottomOnLoadRef.current = true;
+
     setMessages([]);
 
     setSelectedRoomId(room.id);
@@ -614,7 +625,7 @@ export default function ChatPage() {
 
     setMessageText("");
 
-    scrollMessagesToBottom();
+    jumpMessagesToBottom();
 
   }
 

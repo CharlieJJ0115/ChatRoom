@@ -533,6 +533,10 @@ h3 {
   line-height: 1.2;
 }
 
+.mobile-chat-title-row {
+  display: none;
+}
+
 .chat-header-actions {
   display: flex;
   flex: 0 0 auto;
@@ -1384,7 +1388,10 @@ h3 {
     grid-template-columns: 1fr;
     grid-template-rows: minmax(0, 1fr);
     gap: 8px;
-    padding: 10px;
+    min-height: 100svh;
+    height: 100dvh;
+    padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px) + 56px);
+    overflow: hidden;
   }
 
   .chat-sidebar {
@@ -1401,6 +1408,10 @@ h3 {
     min-height: 0;
   }
 
+  .mobile-room-list .chat-sidebar {
+    height: 100%;
+  }
+
   .mobile-room-list .chat-main {
     display: none;
   }
@@ -1411,7 +1422,7 @@ h3 {
 
   .mobile-room-open .chat-main {
     display: flex;
-    height: calc(100vh - 20px);
+    height: 100%;
   }
 
   .create-room-trigger {
@@ -1430,26 +1441,57 @@ h3 {
 
   .room-list-panel {
     max-height: none;
+    min-height: 0;
   }
 
   .chat-header,
   .message-search,
   .message-form {
     gap: 8px;
-    padding: 10px;
+    padding: 8px 10px;
   }
 
   .chat-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
     align-items: flex-start;
     flex-direction: column;
+    background: var(--panel);
   }
 
-  .mobile-back-button {
+  .mobile-chat-title-row {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobile-chat-title-row h2 {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .chat-title-group {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .chat-title-group > .mobile-back-button,
+  .chat-title-group > .eyebrow,
+  .desktop-chat-title {
+    display: none;
+  }
+
+  .mobile-chat-title-row .mobile-back-button {
     display: inline-flex;
     min-height: 36px;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    margin-bottom: 8px;
     border: 0;
     border-radius: 8px;
     padding: 0 12px;

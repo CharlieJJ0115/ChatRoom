@@ -81,6 +81,10 @@ export default function ChatPage() {
 
   const messageRefs = useRef({});
 
+  const chatHeaderRef = useRef();
+
+  const messageListRef = useRef();
+
   const imageInputRef = useRef();
 
   const profileImageInputRef = useRef();
@@ -248,6 +252,32 @@ export default function ChatPage() {
   function handleCloseImagePreview() {
 
     setViewingImageMessage(null);
+
+  }
+
+  function scrollChatHeaderIntoView() {
+
+    window.setTimeout(() => {
+      chatHeaderRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }, 150);
+
+  }
+
+  function scrollMessagesToBottom() {
+
+    window.setTimeout(() => {
+      const messageListElement = messageListRef.current;
+
+      if (!messageListElement) return;
+
+      messageListElement.scrollTo({
+        top: messageListElement.scrollHeight,
+        behavior: "smooth"
+      });
+    }, 50);
 
   }
 
@@ -502,6 +532,8 @@ export default function ChatPage() {
 
     setMessageText("");
 
+    scrollMessagesToBottom();
+
   }
 
   function readImageFile(file) {
@@ -741,8 +773,20 @@ export default function ChatPage() {
         {
           selectedRoom ? (
             <>
-              <header className="chat-header">
-                <div>
+              <header className="chat-header" ref={chatHeaderRef}>
+                <div className="chat-title-group">
+                  <div className="mobile-chat-title-row">
+                    <button
+                      className="mobile-back-button"
+                      type="button"
+                      onClick={handleBackToRooms}
+                    >
+                      Back
+                    </button>
+
+                    <h2>{selectedRoom.name}</h2>
+                  </div>
+
                   <button
                     className="mobile-back-button"
                     type="button"
@@ -752,7 +796,7 @@ export default function ChatPage() {
                   </button>
 
                   <p className="eyebrow">Current Chatroom</p>
-                  <h2>{selectedRoom.name}</h2>
+                  <h2 className="desktop-chat-title">{selectedRoom.name}</h2>
                 </div>
 
                 <div className="chat-header-actions">
@@ -774,7 +818,7 @@ export default function ChatPage() {
                 </div>
               </header>
 
-              <div className="message-list">
+              <div className="message-list" ref={messageListRef}>
                 {messageActionError && <p className="form-error">{messageActionError}</p>}
 
                 {
@@ -902,6 +946,7 @@ export default function ChatPage() {
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   onPaste={handlePasteMessage}
+                  onBlur={scrollChatHeaderIntoView}
                   disabled={isSendingImage}
                 />
 

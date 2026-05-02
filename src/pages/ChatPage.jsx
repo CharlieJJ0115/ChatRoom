@@ -73,6 +73,8 @@ export default function ChatPage() {
 
   const [viewingProfileUser, setViewingProfileUser] = useState(null);
 
+  const [viewingImageMessage, setViewingImageMessage] = useState(null);
+
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
 
   const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState(false);
@@ -230,6 +232,20 @@ export default function ChatPage() {
   function handleCloseReadonlyProfile() {
 
     setViewingProfileUser(null);
+
+  }
+
+  function handleOpenImagePreview(message) {
+
+    if (!message?.imageData) return;
+
+    setViewingImageMessage(message);
+
+  }
+
+  function handleCloseImagePreview() {
+
+    setViewingImageMessage(null);
 
   }
 
@@ -739,11 +755,17 @@ export default function ChatPage() {
                             message.isUnsent ? (
                               <p className="message-unsent">This message was unsent.</p>
                             ) : message.type === "image" ? (
-                              <img
-                                className="message-image"
-                                src={message.imageData}
-                                alt={message.imageName || "Sent image"}
-                              />
+                              <button
+                                className="message-image-button"
+                                type="button"
+                                onClick={() => handleOpenImagePreview(message)}
+                              >
+                                <img
+                                  className="message-image"
+                                  src={message.imageData}
+                                  alt={message.imageName || "Sent image"}
+                                />
+                              </button>
                             ) : editingMessageId === message.id ? (
                               <form
                                 className="edit-message-form"
@@ -1221,6 +1243,43 @@ export default function ChatPage() {
                   <strong>{viewingProfileUser.address || "Not provided"}</strong>
                 </div>
               </div>
+            </section>
+          </div>
+        )
+      }
+
+      {
+        viewingImageMessage && (
+          <div
+            className="image-preview-backdrop"
+            role="presentation"
+            onMouseDown={handleCloseImagePreview}
+          >
+            <section
+              className="image-preview-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Image preview"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <div className="image-preview-actions">
+                <a
+                  href={viewingImageMessage.imageData}
+                  download={viewingImageMessage.imageName || "chatroom-image.png"}
+                >
+                  Download
+                </a>
+
+                <button type="button" onClick={handleCloseImagePreview}>
+                  Close
+                </button>
+              </div>
+
+              <img
+                className="image-preview-image"
+                src={viewingImageMessage.imageData}
+                alt={viewingImageMessage.imageName || "Sent image"}
+              />
             </section>
           </div>
         )

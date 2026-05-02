@@ -244,7 +244,7 @@ h3 {
 
 .chat-app {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr) 320px;
+  grid-template-columns: 300px minmax(0, 1fr);
   gap: 16px;
   height: 100vh;
   overflow: hidden;
@@ -252,23 +252,32 @@ h3 {
 }
 
 .chat-sidebar,
-.chat-main,
-.chat-tools {
+.chat-main {
   min-width: 0;
   min-height: 0;
 }
 
-.chat-sidebar,
-.chat-tools {
+.chat-sidebar {
   display: flex;
   flex-direction: column;
   gap: 16px;
   overflow: hidden;
 }
 
-.chat-tools .tool-panel {
-  display: flex;
-  flex-direction: column;
+.create-room-trigger {
+  min-height: 48px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 16px;
+  color: #ffffff;
+  background: var(--accent);
+  font-weight: 800;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.create-room-trigger:hover {
+  background: var(--accent-strong);
+  transform: translateY(-1px);
 }
 
 .profile-panel,
@@ -366,6 +375,10 @@ h3 {
   grid-column: 1 / -1;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+
+.profile-actions .create-room-trigger {
+  grid-column: 1 / -1;
 }
 
 .ghost-button,
@@ -985,6 +998,10 @@ h3 {
   width: min(560px, 100%);
 }
 
+.create-room-modal {
+  width: min(540px, 100%);
+}
+
 .modal-header {
   display: flex;
   align-items: center;
@@ -1073,6 +1090,20 @@ h3 {
   padding: 20px;
 }
 
+.create-room-modal-body {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.create-room-member-picker {
+  max-height: 42vh;
+  overflow-y: auto;
+}
+
 .members-modal-list {
   flex: 0 0 auto;
   max-height: 38vh;
@@ -1154,14 +1185,9 @@ h3 {
   }
 
   .chat-app {
-    grid-template-columns: 240px minmax(0, 1fr) 260px;
+    grid-template-columns: 240px minmax(0, 1fr);
     gap: 10px;
     padding: 10px;
-  }
-
-  .chat-tools {
-    grid-column: auto;
-    display: flex;
   }
 }
 
@@ -1230,8 +1256,8 @@ h3 {
 
   .chat-app {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.25fr);
-    grid-template-rows: minmax(104px, 0.55fr) minmax(0, 1.35fr);
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
     gap: 8px;
     padding: 10px;
   }
@@ -1239,27 +1265,32 @@ h3 {
   .chat-sidebar {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-rows: auto auto;
     gap: 8px;
+    overflow: visible;
   }
 
   .chat-main {
+    grid-column: 1 / -1;
     min-height: 0;
   }
 
-  .chat-tools {
-    display: flex;
-    gap: 8px;
-  }
-
-  .chat-tools .tool-panel {
-    min-height: 0;
+  .create-room-trigger {
+    width: 100%;
+    min-height: 40px;
+    align-self: start;
+    padding: 0 10px;
+    font-size: 13px;
   }
 
   .profile-panel,
   .room-list-panel,
   .tool-panel {
     padding: 10px;
+  }
+
+  .room-list-panel {
+    max-height: 150px;
   }
 
   .chat-header,
@@ -1335,6 +1366,14 @@ h3 {
     gap: 8px;
   }
 
+  .profile-text h1 {
+    font-size: 13px;
+  }
+
+  .profile-text small {
+    font-size: 11px;
+  }
+
   .ghost-button {
     padding: 8px;
   }
@@ -1383,6 +1422,7 @@ h3 {
   .modal-header,
   .profile-form,
   .members-modal-body,
+  .create-room-modal-body,
   .readonly-profile-details {
     padding: 14px;
   }

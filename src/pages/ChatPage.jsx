@@ -39,6 +39,8 @@ export default function ChatPage() {
 
   const [selectedUserIds, setSelectedUserIds] = useState([]);
 
+  const [newRoomName, setNewRoomName] = useState("");
+
   const [inviteUserIds, setInviteUserIds] = useState([]);
 
   const [selectedRoomId, setSelectedRoomId] = useState(null);
@@ -73,7 +75,7 @@ export default function ChatPage() {
 
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
 
-  const roomNameRef = useRef();
+  const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState(false);
 
   const messageRefs = useRef({});
 
@@ -245,6 +247,18 @@ export default function ChatPage() {
 
   }
 
+  function handleOpenCreateRoomModal() {
+
+    setIsCreateRoomModalOpen(true);
+
+  }
+
+  function handleCloseCreateRoomModal() {
+
+    setIsCreateRoomModalOpen(false);
+
+  }
+
   function handleOpenSearchPanel() {
 
     if (!selectedRoom) return;
@@ -326,7 +340,7 @@ export default function ChatPage() {
 
   async function handleCreateRoom() {
 
-    const roomName = roomNameRef.current.value.trim();
+    const roomName = newRoomName.trim();
 
     if (!roomName) return;
 
@@ -336,9 +350,11 @@ export default function ChatPage() {
       selectedUserIds
     );
 
-    roomNameRef.current.value = "";
+    setNewRoomName("");
 
     setSelectedUserIds([]);
+
+    setIsCreateRoomModalOpen(false);
 
     alert("Chatroom Created!");
 
@@ -600,6 +616,14 @@ export default function ChatPage() {
 
             <button className="ghost-button" type="button" onClick={handleLogout}>
               Logout
+            </button>
+
+            <button
+              className="create-room-trigger"
+              type="button"
+              onClick={handleOpenCreateRoomModal}
+            >
+              Create Chatroom
             </button>
           </div>
         </section>
@@ -879,54 +903,73 @@ export default function ChatPage() {
         }
       </section>
 
-      <aside className="chat-tools">
-        <section className="tool-panel">
-          <div className="section-heading">
-            <h2>Create Chatroom</h2>
+      {
+        isCreateRoomModalOpen && (
+          <div className="modal-backdrop" role="presentation" onMouseDown={handleCloseCreateRoomModal}>
+            <section
+              className="profile-modal create-room-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="create-room-modal-title"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <div>
+                  <p className="eyebrow">New Chatroom</p>
+                  <h2 id="create-room-modal-title">Create Chatroom</h2>
+                </div>
+
+                <button className="modal-close" type="button" onClick={handleCloseCreateRoomModal}>
+                  Close
+                </button>
+              </div>
+
+              <div className="create-room-modal-body">
+                <input
+                  className="room-name-input"
+                  type="text"
+                  placeholder="Room name"
+                  value={newRoomName}
+                  onChange={(e) => setNewRoomName(e.target.value)}
+                />
+
+                <div className="member-picker create-room-member-picker">
+                  <h3>Add Members</h3>
+
+                  {
+                    selectableUsers.length === 0 && (
+                      <p className="empty-copy">No other registered users found.</p>
+                    )
+                  }
+
+                  {
+                    selectableUsers.map((user) => (
+                      <label className="member-option" key={user.uid}>
+                        <input
+                          type="checkbox"
+                          checked={selectedUserIds.includes(user.uid)}
+                          onChange={() => handleSelectUser(user.uid)}
+                        />
+
+                        {renderAvatar(user)}
+
+                        <span>
+                          <strong>{getDisplayName(user)}</strong>
+                          <small>{user.email}</small>
+                        </span>
+                      </label>
+                    ))
+                  }
+                </div>
+
+                <button className="primary-button" onClick={handleCreateRoom}>
+                  Create Chatroom
+                </button>
+              </div>
+            </section>
           </div>
-
-          <input
-            className="room-name-input"
-            type="text"
-            placeholder="Room name"
-            ref={roomNameRef}
-          />
-
-          <div className="member-picker">
-            <h3>Add Members</h3>
-
-            {
-              selectableUsers.length === 0 && (
-                <p className="empty-copy">No other registered users found.</p>
-              )
-            }
-
-            {
-              selectableUsers.map((user) => (
-                <label className="member-option" key={user.uid}>
-                  <input
-                    type="checkbox"
-                    checked={selectedUserIds.includes(user.uid)}
-                    onChange={() => handleSelectUser(user.uid)}
-                  />
-
-                  {renderAvatar(user)}
-
-                  <span>
-                    <strong>{getDisplayName(user)}</strong>
-                    <small>{user.email}</small>
-                  </span>
-                </label>
-              ))
-            }
-          </div>
-
-          <button className="primary-button" onClick={handleCreateRoom}>
-            Create Chatroom
-          </button>
-        </section>
-
-      </aside>
+        )
+      }
 
       {
         isProfileOpen && (

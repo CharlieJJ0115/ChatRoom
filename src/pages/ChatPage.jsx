@@ -10,7 +10,8 @@ import {
   sendImageMessage,
   sendMessage,
   subscribeMessages,
-  unsendMessage
+  unsendMessage,
+  updateChatroomProfile
 } from "../firebase/chatroomService";
 
 import {
@@ -26,6 +27,11 @@ const emptyProfileForm = {
   email: "",
   phoneNumber: "",
   address: ""
+};
+
+const emptyRoomSettingsForm = {
+  name: "",
+  photoURL: ""
 };
 
 const maxImageSizeBytes = 750 * 1024;
@@ -74,6 +80,14 @@ export default function ChatPage() {
 
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
+  const [isRoomSettingsOpen, setIsRoomSettingsOpen] = useState(false);
+
+  const [roomSettingsForm, setRoomSettingsForm] = useState(emptyRoomSettingsForm);
+
+  const [roomSettingsError, setRoomSettingsError] = useState("");
+
+  const [isSavingRoomSettings, setIsSavingRoomSettings] = useState(false);
+
   const [viewingProfileUser, setViewingProfileUser] = useState(null);
 
   const [viewingImageMessage, setViewingImageMessage] = useState(null);
@@ -95,6 +109,8 @@ export default function ChatPage() {
   const imageInputRef = useRef();
 
   const profileImageInputRef = useRef();
+
+  const roomPictureInputRef = useRef();
 
   const selectedRoom = chatrooms.find((room) => room.id === selectedRoomId);
 
@@ -319,6 +335,23 @@ export default function ChatPage() {
     );
   }
 
+  function renderRoomAvatar(room, className = "room-avatar") {
+
+    const roomName = room?.name || "Chatroom";
+
+    return room?.photoURL ? (
+      <img
+        className={`${className} profile-image`}
+        src={room.photoURL}
+        alt={roomName}
+      />
+    ) : (
+      <span className={className}>
+        {roomName.charAt(0).toUpperCase()}
+      </span>
+    );
+  }
+
   async function handleLogout() {
 
     await logout();
@@ -342,6 +375,42 @@ export default function ChatPage() {
     setIsProfileOpen(false);
 
     setProfileError("");
+
+  }
+
+  function handleOpenRoomSettings() {
+
+    if (!selectedRoom) return;
+
+    setRoomSettingsForm({
+      name: selectedRoom.name || "",
+      photoURL: selectedRoom.photoURL || ""
+    });
+
+    setRoomSettingsError("");
+
+    setIsRoomSettingsOpen(true);
+
+  }
+
+  function handleCloseRoomSettings() {
+
+    if (isSavingRoomSettings) return;
+
+    setIsRoomSettingsOpen(false);
+
+    setRoomSettingsError("");
+
+  }
+
+  function handleRoomSettingsChange(e) {
+
+    const { name, value } = e.target;
+
+    setRoomSettingsForm((prev) => ({
+      ...prev,
+      [name]: value
+    }));
 
   }
 
@@ -447,6 +516,22 @@ export default function ChatPage() {
 
   }
 
+  function handleOpenSearchFromSettings() {
+
+    setIsRoomSettingsOpen(false);
+
+    handleOpenSearchPanel();
+
+  }
+
+  function handleOpenMembersFromSettings() {
+
+    setIsRoomSettingsOpen(false);
+
+    handleOpenMembersModal();
+
+  }
+
   function handleCloseSearchPanel() {
 
     setIsSearchPanelOpen(false);
@@ -527,6 +612,66 @@ export default function ChatPage() {
       setProfileError("");
     } catch (err) {
       setProfileError(err.message);
+    }
+  }
+
+  async function handleSelectRoomPicture(e) {
+
+    const file = e.target.files?.[0];
+
+    e.target.value = "";
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setRoomSettingsError("Please choose an image file.");
+      return;
+    }
+
+    if (file.size > maxImageSizeBytes) {
+      setRoomSettingsError("Image must be 750KB or smaller.");
+      return;
+    }
+
+    try {
+      const imageData = await readImageFile(file);
+
+      setRoomSettingsForm((prev) => ({
+        ...prev,
+        photoURL: imageData
+      }));
+
+      setRoomSettingsError("");
+    } catch (err) {
+      setRoomSettingsError(err.message);
+    }
+  }
+
+  async function handleSaveRoomSettings(e) {
+
+    e.preventDefault();
+
+    const cleanedSettings = {
+      name: roomSettingsForm.name.trim(),
+      photoURL: roomSettingsForm.photoURL.trim()
+    };
+
+    if (!selectedRoom || !cleanedSettings.name) {
+      setRoomSettingsError("Room name is required.");
+      return;
+    }
+
+    try {
+      setIsSavingRoomSettings(true);
+      setRoomSettingsError("");
+
+      await updateChatroomProfile(selectedRoom.id, cleanedSettings);
+
+      setIsRoomSettingsOpen(false);
+    } catch (err) {
+      setRoomSettingsError(err.message);
+    } finally {
+      setIsSavingRoomSettings(false);
     }
   }
 
@@ -906,9 +1051,7 @@ export default function ChatPage() {
                       key={room.id}
                       onClick={() => handleSelectRoom(room)}
                     >
-                      <span className="room-avatar">
-                        {room.name?.charAt(0).toUpperCase()}
-                      </span>
+                      {renderRoomAvatar(room)}
 
                       <span className="room-meta">
                         <strong>{room.name}</strong>
@@ -955,19 +1098,13 @@ export default function ChatPage() {
 
                 <div className="chat-header-actions">
                   <button
-                    className="header-action-button"
+                    className="settings-button"
                     type="button"
-                    onClick={handleOpenSearchPanel}
+                    onClick={handleOpenRoomSettings}
+                    aria-label="Open room settings"
                   >
-                    Search
-                  </button>
-
-                  <button
-                    className="member-count-button"
-                    type="button"
-                    onClick={handleOpenMembersModal}
-                  >
-                    {visibleMemberCount} members
+                    <span aria-hidden="true">⚙</span>
+                    <span className="settings-button-text">Settings</span>
                   </button>
                 </div>
               </header>
@@ -1256,6 +1393,106 @@ export default function ChatPage() {
                   Create Chatroom
                 </button>
               </div>
+            </section>
+          </div>
+        )
+      }
+
+      {
+        isRoomSettingsOpen && selectedRoom && (
+          <div className="modal-backdrop" role="presentation" onMouseDown={handleCloseRoomSettings}>
+            <section
+              className="profile-modal room-settings-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="room-settings-modal-title"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <div>
+                  <p className="eyebrow">Current Chatroom</p>
+                  <h2 id="room-settings-modal-title">Room Settings</h2>
+                </div>
+
+                <button className="modal-close" type="button" onClick={handleCloseRoomSettings}>
+                  Close
+                </button>
+              </div>
+
+              <div className="profile-preview">
+                {renderRoomAvatar(roomSettingsForm, "avatar profile-preview-avatar")}
+                <div>
+                  <strong>{roomSettingsForm.name || "Chatroom"}</strong>
+                  <small>{visibleMemberCount} members</small>
+                </div>
+              </div>
+
+              {roomSettingsError && <p className="form-error">{roomSettingsError}</p>}
+
+              <form className="profile-form" onSubmit={handleSaveRoomSettings}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={roomPictureInputRef}
+                  onChange={handleSelectRoomPicture}
+                  hidden
+                />
+
+                <label className="field-group">
+                  <span>Room name</span>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Room name"
+                    value={roomSettingsForm.name}
+                    onChange={handleRoomSettingsChange}
+                    required
+                  />
+                </label>
+
+                <label className="field-group">
+                  <span>Chatroom picture URL</span>
+                  <input
+                    type="url"
+                    name="photoURL"
+                    placeholder="https://example.com/room.png"
+                    value={roomSettingsForm.photoURL}
+                    onChange={handleRoomSettingsChange}
+                  />
+                </label>
+
+                <div className="profile-upload-row">
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => roomPictureInputRef.current?.click()}
+                  >
+                    Upload Image
+                  </button>
+
+                  <span>Image file, max 750KB</span>
+                </div>
+
+                <div className="room-settings-actions">
+                  <button className="secondary-button" type="button" onClick={handleOpenSearchFromSettings}>
+                    Search Messages
+                  </button>
+
+                  <button className="secondary-button" type="button" onClick={handleOpenMembersFromSettings}>
+                    Manage Members
+                  </button>
+                </div>
+
+                <div className="modal-actions">
+                  <button className="secondary-button" type="button" onClick={handleCloseRoomSettings}>
+                    Cancel
+                  </button>
+
+                  <button className="primary-button" type="submit" disabled={isSavingRoomSettings}>
+                    {isSavingRoomSettings ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
             </section>
           </div>
         )

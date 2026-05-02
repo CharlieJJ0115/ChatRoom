@@ -22,6 +22,8 @@ export async function createChatroom(name, uid, memberUids = []) {
 
     type: "group",
 
+    photoURL: "",
+
     members,
 
     createdBy: uid,
@@ -163,6 +165,21 @@ export async function markChatroomRead(roomId, uid) {
   await updateDoc(doc(db, "chatrooms", roomId), {
 
     [`readBy.${uid}`]: serverTimestamp()
+
+  });
+}
+
+export async function updateChatroomProfile(roomId, profileData) {
+
+  const roomName = profileData.name.trim();
+
+  if (!roomId || !roomName) return;
+
+  await updateDoc(doc(db, "chatrooms", roomId), {
+
+    name: roomName,
+
+    photoURL: profileData.photoURL.trim()
 
   });
 }

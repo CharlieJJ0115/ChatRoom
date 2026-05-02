@@ -48,6 +48,8 @@ export default function ChatPage() {
 
   const [messages, setMessages] = useState([]);
 
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+
   const [messageText, setMessageText] = useState("");
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -88,6 +90,8 @@ export default function ChatPage() {
 
   const shouldScrollToBottomOnLoadRef = useRef(false);
 
+  const isSettlingInitialScrollRef = useRef(false);
+
   const imageInputRef = useRef();
 
   const profileImageInputRef = useRef();
@@ -122,9 +126,26 @@ export default function ChatPage() {
 
   useEffect(() => {
 
-    if (!selectedRoomId) return;
+    if (!selectedRoomId) {
+      setIsLoadingMessages(false);
+      return;
+    }
 
-    const unsubscribe = subscribeMessages(selectedRoomId, setMessages);
+    setIsLoadingMessages(true);
+
+    setMessages([]);
+
+    const unsubscribe = subscribeMessages(
+      selectedRoomId,
+      (nextMessages) => {
+        setMessages(nextMessages);
+        setIsLoadingMessages(false);
+      },
+      (error) => {
+        setMessageActionError(error.message);
+        setIsLoadingMessages(false);
+      }
+    );
 
     return unsubscribe;
 
@@ -134,7 +155,16 @@ export default function ChatPage() {
 
     if (!selectedRoomId || !shouldScrollToBottomOnLoadRef.current) return;
 
-    jumpMessagesToBottom();
+    isSettlingInitialScrollRef.current = true;
+
+    jumpMessagesToBottom({
+      retries: 4,
+      interval: 120
+    });
+
+    window.setTimeout(() => {
+      isSettlingInitialScrollRef.current = false;
+    }, 800);
 
     shouldScrollToBottomOnLoadRef.current = false;
 
@@ -354,15 +384,32 @@ export default function ChatPage() {
 
   }
 
-  function jumpMessagesToBottom(delay = 100) {
+  function jumpMessagesToBottom(options = {}) {
 
-    window.setTimeout(() => {
+    const {
+      retries = 1,
+      interval = 100
+    } = options;
+
+    function jump(remainingRetries) {
+
       const messageListElement = messageListRef.current;
 
-      if (!messageListElement) return;
+      if (messageListElement) {
+        messageListElement.scrollTop = messageListElement.scrollHeight;
+      }
 
-      messageListElement.scrollTop = messageListElement.scrollHeight;
-    }, delay);
+      if (remainingRetries <= 1) return;
+
+      window.setTimeout(() => {
+        jump(remainingRetries - 1);
+      }, interval);
+
+    }
+
+    window.setTimeout(() => {
+      jump(retries);
+    }, interval);
 
   }
 
@@ -426,6 +473,17 @@ export default function ChatPage() {
         currentId === messageId ? null : currentId
       ));
     }, 2000);
+
+  }
+
+  function handleMessageImageLoad() {
+
+    if (!isSettlingInitialScrollRef.current || highlightedMessageId) return;
+
+    jumpMessagesToBottom({
+      retries: 1,
+      interval: 0
+    });
 
   }
 
@@ -625,7 +683,10 @@ export default function ChatPage() {
 
     setMessageText("");
 
-    jumpMessagesToBottom();
+    jumpMessagesToBottom({
+      retries: 2,
+      interval: 80
+    });
 
   }
 
@@ -915,7 +976,11 @@ export default function ChatPage() {
                 {messageActionError && <p className="form-error">{messageActionError}</p>}
 
                 {
-                  messages.length === 0 && (
+                  isLoadingMessages ? (
+                    <div className="center-empty">
+                      <h3>Loading messages...</h3>
+                    </div>
+                  ) : messages.length === 0 && (
                     <div className="center-empty">
                       <h3>No messages yet</h3>
                       <p>Send the first message to this chatroom.</p>
@@ -965,6 +1030,7 @@ export default function ChatPage() {
                                   className="message-image"
                                   src={message.imageData}
                                   alt={message.imageName || "Sent image"}
+                                  onLoad={handleMessageImageLoad}
                                 />
                               </button>
                             ) : editingMessageId === message.id ? (

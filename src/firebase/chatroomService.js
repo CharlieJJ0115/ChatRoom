@@ -199,7 +199,7 @@ export async function unsendMessage(roomId, messageId) {
   });
 }
 
-export function subscribeMessages(roomId, callback) {
+export function subscribeMessages(roomId, callback, errorCallback) {
 
   const q = query(
     collection(db, "chatrooms", roomId, "messages"),
@@ -215,5 +215,5 @@ export function subscribeMessages(roomId, callback) {
 
     callback(messages);
 
-  });
+  }, errorCallback);
 }

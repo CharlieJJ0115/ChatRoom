@@ -86,6 +86,10 @@ export default function ChatPage() {
 
   const [replyingToMessage, setReplyingToMessage] = useState(null);
 
+  const [openEmojiMessageId, setOpenEmojiMessageId] = useState(null);
+
+  const [openMoreMessageId, setOpenMoreMessageId] = useState(null);
+
   const [isSendingImage, setIsSendingImage] = useState(false);
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -548,13 +552,35 @@ export default function ChatPage() {
 
       if (message.reactions?.[currentUser.uid] === emoji) {
         await removeMessageReaction(selectedRoom.id, message.id, currentUser.uid);
+        setOpenEmojiMessageId(null);
         return;
       }
 
       await setMessageReaction(selectedRoom.id, message.id, currentUser.uid, emoji);
+      setOpenEmojiMessageId(null);
     } catch (err) {
       setMessageActionError(err.message);
     }
+
+  }
+
+  function handleToggleEmojiPicker(messageId) {
+
+    setOpenMoreMessageId(null);
+
+    setOpenEmojiMessageId((currentMessageId) => (
+      currentMessageId === messageId ? null : messageId
+    ));
+
+  }
+
+  function handleToggleMoreActions(messageId) {
+
+    setOpenEmojiMessageId(null);
+
+    setOpenMoreMessageId((currentMessageId) => (
+      currentMessageId === messageId ? null : messageId
+    ));
 
   }
 
@@ -1061,6 +1087,10 @@ export default function ChatPage() {
 
       setReplyingToMessage(null);
 
+      setOpenEmojiMessageId(null);
+
+      setOpenMoreMessageId(null);
+
       setMessageActionError("");
 
       try {
@@ -1092,6 +1122,10 @@ export default function ChatPage() {
 
     setReplyingToMessage(null);
 
+    setOpenEmojiMessageId(null);
+
+    setOpenMoreMessageId(null);
+
     setMessageActionError("");
 
     try {
@@ -1121,6 +1155,10 @@ export default function ChatPage() {
     setEditingMessageText("");
 
     setReplyingToMessage(null);
+
+    setOpenEmojiMessageId(null);
+
+    setOpenMoreMessageId(null);
 
     setMessageActionError("");
 
@@ -1179,6 +1217,10 @@ export default function ChatPage() {
     if (!message || message.isUnsent) return;
 
     setReplyingToMessage(message);
+
+    setOpenEmojiMessageId(null);
+
+    setOpenMoreMessageId(null);
 
     setMessageActionError("");
 
@@ -1268,6 +1310,10 @@ export default function ChatPage() {
 
     setEditingMessageText(message.text || "");
 
+    setOpenEmojiMessageId(null);
+
+    setOpenMoreMessageId(null);
+
     setMessageActionError("");
 
   }
@@ -1316,6 +1362,10 @@ export default function ChatPage() {
       setMessageActionError("");
 
       await unsendMessage(selectedRoom.id, message.id);
+
+      setOpenEmojiMessageId(null);
+
+      setOpenMoreMessageId(null);
 
       if (editingMessageId === message.id) {
         setEditingMessageId(null);
@@ -1517,128 +1567,211 @@ export default function ChatPage() {
                           onClick: isOwnMessage ? null : () => handleOpenReadonlyProfile(sender)
                         })}
 
-                        <div className={`message-bubble ${message.type === "image" && !message.isUnsent ? "image-message-bubble" : ""}`}>
-                          <span className="message-sender">
-                            {getDisplayName(sender)}
-                          </span>
-
+                        <div className="message-content-stack">
                           {
                             !message.isUnsent && message.replyTo && (
-                              <button
-                                className="message-reply-preview"
-                                type="button"
-                                onClick={() => handleJumpToMessage(message.replyTo.messageId)}
-                              >
-                                <strong>{getReplySenderName(message.replyTo)}</strong>
-                                <span>{message.replyTo.text || "Message"}</span>
-                              </button>
+                              <div className="reply-context">
+                                <span>↩ {isOwnMessage ? "You replied to" : `${getDisplayName(sender)} replied to`} {getReplySenderName(message.replyTo)}</span>
+
+                                <button
+                                  className="message-reply-preview"
+                                  type="button"
+                                  onClick={() => handleJumpToMessage(message.replyTo.messageId)}
+                                >
+                                  <strong>{getReplySenderName(message.replyTo)}</strong>
+                                  <span>{message.replyTo.text || "Message"}</span>
+                                </button>
+                              </div>
                             )
                           }
 
-                          {
-                            message.isUnsent ? (
-                              <p className="message-unsent">This message was unsent.</p>
-                            ) : message.type === "image" ? (
-                              <button
-                                className="message-image-button"
-                                type="button"
-                                onClick={() => handleOpenImagePreview(message)}
-                              >
-                                <img
-                                  className="message-image"
-                                  src={message.imageData}
-                                  alt={message.imageName || "Sent image"}
-                                  onLoad={handleMessageImageLoad}
-                                />
-                              </button>
-                            ) : editingMessageId === message.id ? (
-                              <form
-                                className="edit-message-form"
-                                onSubmit={(e) => handleSaveEditMessage(e, message.id)}
-                              >
-                                <input
-                                  type="text"
-                                  value={editingMessageText}
-                                  onChange={(e) => setEditingMessageText(e.target.value)}
-                                  autoFocus
-                                />
+                          <div className="message-body-line">
+                            {
+                              isOwnMessage && !message.isUnsent && editingMessageId !== message.id && (
+                                <div className="message-action-shell">
+                                  <div className="message-action-row" aria-label="Message actions">
+                                    {
+                                      canUnsendMessage && (
+                                        <button
+                                          className="message-icon-button"
+                                          type="button"
+                                          onClick={() => handleToggleMoreActions(message.id)}
+                                          aria-label="More message actions"
+                                        >
+                                          ⋮
+                                        </button>
+                                      )
+                                    }
 
-                                <div className="edit-message-actions">
-                                  <button type="submit">Save</button>
-                                  <button type="button" onClick={handleCancelEditMessage}>
-                                    Cancel
-                                  </button>
-                                </div>
-                              </form>
-                            ) : (
-                              <p>{message.text}</p>
-                            )
-                          }
+                                    <button
+                                      className="message-icon-button"
+                                      type="button"
+                                      onClick={() => handleStartReply(message)}
+                                      aria-label="Reply to message"
+                                    >
+                                      ↩
+                                    </button>
 
-                          {
-                            !message.isUnsent && (
-                              <div className="reaction-area">
-                                <div className="reaction-picker" aria-label="Message reactions">
+                                    <button
+                                      className="message-icon-button"
+                                      type="button"
+                                      onClick={() => handleToggleEmojiPicker(message.id)}
+                                      aria-label="React to message"
+                                    >
+                                      ☺
+                                    </button>
+                                  </div>
+
                                   {
-                                    availableReactionEmojis.map((emoji) => (
-                                      <button
-                                        className={`reaction-button ${currentUserReaction === emoji ? "active" : ""}`}
-                                        type="button"
-                                        key={emoji}
-                                        onClick={() => handleToggleReaction(message, emoji)}
-                                        aria-label={`React with ${emoji}`}
-                                      >
-                                        {emoji}
-                                      </button>
-                                    ))
+                                    openEmojiMessageId === message.id && (
+                                      <div className="message-action-popover emoji-popover">
+                                        {
+                                          availableReactionEmojis.map((emoji) => (
+                                            <button
+                                              className={`reaction-button ${currentUserReaction === emoji ? "active" : ""}`}
+                                              type="button"
+                                              key={emoji}
+                                              onClick={() => handleToggleReaction(message, emoji)}
+                                              aria-label={`React with ${emoji}`}
+                                            >
+                                              {emoji}
+                                            </button>
+                                          ))
+                                        }
+                                      </div>
+                                    )
+                                  }
+
+                                  {
+                                    openMoreMessageId === message.id && canUnsendMessage && (
+                                      <div className="message-action-popover more-popover">
+                                        {
+                                          canEditMessage && (
+                                            <button type="button" onClick={() => handleStartEditMessage(message)}>
+                                              Edit
+                                            </button>
+                                          )
+                                        }
+
+                                        <button type="button" onClick={() => handleUnsendMessage(message)}>
+                                          Unsend
+                                        </button>
+                                      </div>
+                                    )
                                   }
                                 </div>
+                              )
+                            }
 
-                                {
-                                  reactionCounts.length > 0 && (
+                            <div className={`message-bubble ${message.type === "image" && !message.isUnsent ? "image-message-bubble" : ""}`}>
+                              <span className="message-sender">
+                                {getDisplayName(sender)}
+                              </span>
+
+                              {
+                                message.isUnsent ? (
+                                  <p className="message-unsent">This message was unsent.</p>
+                                ) : message.type === "image" ? (
+                                  <button
+                                    className="message-image-button"
+                                    type="button"
+                                    onClick={() => handleOpenImagePreview(message)}
+                                  >
+                                    <img
+                                      className="message-image"
+                                      src={message.imageData}
+                                      alt={message.imageName || "Sent image"}
+                                      onLoad={handleMessageImageLoad}
+                                    />
+                                  </button>
+                                ) : editingMessageId === message.id ? (
+                                  <form
+                                    className="edit-message-form"
+                                    onSubmit={(e) => handleSaveEditMessage(e, message.id)}
+                                  >
+                                    <input
+                                      type="text"
+                                      value={editingMessageText}
+                                      onChange={(e) => setEditingMessageText(e.target.value)}
+                                      autoFocus
+                                    />
+
+                                    <div className="edit-message-actions">
+                                      <button type="submit">Save</button>
+                                      <button type="button" onClick={handleCancelEditMessage}>
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  </form>
+                                ) : (
+                                  <p>{message.text}</p>
+                                )
+                              }
+                            </div>
+
+                            {
+                              !isOwnMessage && !message.isUnsent && editingMessageId !== message.id && (
+                                <div className="message-action-shell">
+                                  <div className="message-action-row" aria-label="Message actions">
                                     <button
-                                      className="reaction-summary"
+                                      className="message-icon-button"
                                       type="button"
-                                      onClick={() => handleOpenReactions(message)}
-                                      aria-label="View message reactions"
+                                      onClick={() => handleStartReply(message)}
+                                      aria-label="Reply to message"
                                     >
-                                      {
-                                        reactionCounts.map((reactionCount) => (
-                                          <span key={reactionCount.emoji}>
-                                            {reactionCount.emoji} {reactionCount.count}
-                                          </span>
-                                        ))
-                                      }
+                                      ↩
                                     </button>
-                                  )
-                                }
-                              </div>
-                            )
-                          }
+
+                                    <button
+                                      className="message-icon-button"
+                                      type="button"
+                                      onClick={() => handleToggleEmojiPicker(message.id)}
+                                      aria-label="React to message"
+                                    >
+                                      ☺
+                                    </button>
+                                  </div>
+
+                                  {
+                                    openEmojiMessageId === message.id && (
+                                      <div className="message-action-popover emoji-popover">
+                                        {
+                                          availableReactionEmojis.map((emoji) => (
+                                            <button
+                                              className={`reaction-button ${currentUserReaction === emoji ? "active" : ""}`}
+                                              type="button"
+                                              key={emoji}
+                                              onClick={() => handleToggleReaction(message, emoji)}
+                                              aria-label={`React with ${emoji}`}
+                                            >
+                                              {emoji}
+                                            </button>
+                                          ))
+                                        }
+                                      </div>
+                                    )
+                                  }
+                                </div>
+                              )
+                            }
+                          </div>
 
                           {
-                            !message.isUnsent && editingMessageId !== message.id && (
-                              <div className="message-actions">
-                                <button type="button" onClick={() => handleStartReply(message)}>
-                                  Reply
-                                </button>
-
+                            !message.isUnsent && reactionCounts.length > 0 && (
+                              <button
+                                className="reaction-summary"
+                                type="button"
+                                onClick={() => handleOpenReactions(message)}
+                                aria-label="View message reactions"
+                              >
                                 {
-                                  canEditMessage && (
-                                    <button type="button" onClick={() => handleStartEditMessage(message)}>
-                                      Edit
-                                    </button>
-                                  )
+                                  reactionCounts.map((reactionCount) => (
+                                    <span key={reactionCount.emoji}>
+                                      {reactionCount.emoji} {reactionCount.count}
+                                    </span>
+                                  ))
                                 }
-
-                                {
-                                  canUnsendMessage && (
-                                    <button type="button" onClick={() => handleUnsendMessage(message)}>
-                                      Unsend
-                                    </button>
-                                  )
-                                }
-                              </div>
+                              </button>
                             )
                           }
                         </div>

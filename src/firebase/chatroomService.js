@@ -1,6 +1,7 @@
 import {
   collection,
   addDoc,
+  deleteField,
   doc,
   arrayUnion,
   onSnapshot,
@@ -64,13 +65,13 @@ export async function addMembersToChatroom(roomId, memberUids = []) {
   });
 }
 
-export async function sendMessage(roomId, user, text) {
+export async function sendMessage(roomId, user, text, replyTo = null) {
 
   const messageText = text.trim();
 
   if (!messageText) return;
 
-  await addDoc(collection(db, "chatrooms", roomId, "messages"), {
+  const messageData = {
 
     text: messageText,
 
@@ -86,7 +87,13 @@ export async function sendMessage(roomId, user, text) {
 
     updatedAt: serverTimestamp()
 
-  });
+  };
+
+  if (replyTo) {
+    messageData.replyTo = replyTo;
+  }
+
+  await addDoc(collection(db, "chatrooms", roomId, "messages"), messageData);
 
   await updateDoc(doc(db, "chatrooms", roomId), {
 
@@ -210,6 +217,32 @@ export async function unsendMessage(roomId, messageId) {
     imageData: "",
 
     isUnsent: true,
+
+    updatedAt: serverTimestamp()
+
+  });
+}
+
+export async function setMessageReaction(roomId, messageId, uid, emoji) {
+
+  if (!roomId || !messageId || !uid || !emoji) return;
+
+  await updateDoc(doc(db, "chatrooms", roomId, "messages", messageId), {
+
+    [`reactions.${uid}`]: emoji,
+
+    updatedAt: serverTimestamp()
+
+  });
+}
+
+export async function removeMessageReaction(roomId, messageId, uid) {
+
+  if (!roomId || !messageId || !uid) return;
+
+  await updateDoc(doc(db, "chatrooms", roomId, "messages", messageId), {
+
+    [`reactions.${uid}`]: deleteField(),
 
     updatedAt: serverTimestamp()
 

@@ -772,6 +772,55 @@ h3 {
   line-height: 1.45;
 }
 
+.message-reply-preview {
+  display: grid;
+  width: 100%;
+  gap: 3px;
+  margin: 0 0 8px;
+  border: 0;
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 7px 9px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.78);
+  text-align: left;
+}
+
+.message-reply-preview:hover {
+  background: #ffffff;
+}
+
+.message-reply-preview strong,
+.message-reply-preview span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-reply-preview strong {
+  color: var(--accent);
+  font-size: 12px;
+}
+
+.message-reply-preview span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.message-row.own .message-reply-preview {
+  border-left-color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.message-row.own .message-reply-preview:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.message-row.own .message-reply-preview strong,
+.message-row.own .message-reply-preview span {
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .message-image {
   display: block;
   width: auto;
@@ -812,6 +861,55 @@ h3 {
 
 .message-actions button:hover,
 .edit-message-actions button:hover {
+  background: #ffffff;
+}
+
+.reaction-area {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.reaction-picker,
+.reaction-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.reaction-button,
+.reaction-summary {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.reaction-button {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  padding: 0;
+}
+
+.reaction-button:hover,
+.reaction-button.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.reaction-summary {
+  width: fit-content;
+  align-items: center;
+  padding: 4px 8px;
+  color: var(--text);
+}
+
+.reaction-summary:hover {
+  border-color: var(--accent);
   background: #ffffff;
 }
 
@@ -948,6 +1046,55 @@ h3 {
 .search-result-item small {
   color: var(--muted);
   font-size: 13px;
+}
+
+.reply-composer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--panel-muted);
+}
+
+.reply-composer div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.reply-composer span,
+.reply-composer strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reply-composer span {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.reply-composer strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.reply-composer button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: var(--muted);
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.reply-composer button:hover {
+  color: var(--accent);
 }
 
 .message-form {
@@ -1278,6 +1425,83 @@ h3 {
   padding: 20px;
 }
 
+.reaction-modal {
+  width: min(540px, 100%);
+}
+
+.reaction-modal-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.reaction-modal-tabs button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 12px;
+  color: var(--muted);
+  background: var(--panel-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.reaction-modal-tabs button.active,
+.reaction-modal-tabs button:hover {
+  color: #ffffff;
+  background: var(--accent);
+}
+
+.reaction-user-list {
+  display: flex;
+  min-height: 160px;
+  max-height: 48vh;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding: 16px 20px 20px;
+}
+
+.reaction-user-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.reaction-user-row:hover {
+  background: var(--panel-muted);
+}
+
+.reaction-user-row span:nth-child(2) {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reaction-user-row strong,
+.reaction-user-row small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reaction-user-row small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.reaction-user-emoji {
+  flex: 0 0 auto;
+  font-size: 22px;
+}
+
 .image-preview-backdrop {
   position: fixed;
   inset: 0;
@@ -1529,6 +1753,7 @@ h3 {
 
   .chat-header,
   .message-search,
+  .reply-composer,
   .message-form {
     gap: 8px;
     padding: 8px 10px;
@@ -1637,6 +1862,14 @@ h3 {
     max-width: 86%;
   }
 
+  .reply-composer {
+    align-items: stretch;
+  }
+
+  .reply-composer button {
+    padding: 0 10px;
+  }
+
   .search-panel {
     width: 100%;
     border-left: 0;
@@ -1714,8 +1947,13 @@ h3 {
   .profile-form,
   .members-modal-body,
   .create-room-modal-body,
-  .readonly-profile-details {
+  .readonly-profile-details,
+  .reaction-user-list {
     padding: 14px;
+  }
+
+  .reaction-modal-tabs {
+    padding: 12px 14px;
   }
 
   .profile-preview {

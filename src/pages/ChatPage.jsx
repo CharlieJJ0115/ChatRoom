@@ -7,8 +7,10 @@ import {
   createChatroom,
   editMessage,
   markChatroomRead,
+  removeMessageReaction,
   sendImageMessage,
   sendMessage,
+  setMessageReaction,
   subscribeMessages,
   unsendMessage,
   updateChatroomProfile
@@ -35,6 +37,8 @@ const emptyRoomSettingsForm = {
 };
 
 const maxImageSizeBytes = 750 * 1024;
+
+const availableReactionEmojis = ["👍", "❤️", "😂", "😮", "😢"];
 
 function getBrowserNotificationPermission() {
 
@@ -80,6 +84,8 @@ export default function ChatPage() {
 
   const [messageActionError, setMessageActionError] = useState("");
 
+  const [replyingToMessage, setReplyingToMessage] = useState(null);
+
   const [isSendingImage, setIsSendingImage] = useState(false);
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -101,6 +107,8 @@ export default function ChatPage() {
   const [viewingProfileUser, setViewingProfileUser] = useState(null);
 
   const [viewingImageMessage, setViewingImageMessage] = useState(null);
+
+  const [viewingReactions, setViewingReactions] = useState(null);
 
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
 
@@ -133,6 +141,10 @@ export default function ChatPage() {
   const roomPictureInputRef = useRef();
 
   const selectedRoom = chatrooms.find((room) => room.id === selectedRoomId);
+
+  const viewingReactionMessage = viewingReactions
+    ? messages.find((message) => message.id === viewingReactions.messageId)
+    : null;
 
   const currentUserProfile = users.find((user) => user.uid === currentUser?.uid);
 
@@ -348,6 +360,54 @@ export default function ChatPage() {
 
   }
 
+  function getReplyPreviewText(message) {
+
+    if (!message) return "";
+
+    if (message.type === "image") {
+      return "Image message";
+    }
+
+    if (message.isUnsent) {
+      return "This message was unsent.";
+    }
+
+    return message.text || "Message";
+
+  }
+
+  function getReplySnapshot(message) {
+
+    const sender = getUserById(message.senderId) || {
+      email: message.senderEmail,
+      username: message.senderEmail
+    };
+
+    return {
+      messageId: message.id,
+      senderId: message.senderId,
+      senderEmail: message.senderEmail,
+      senderName: getDisplayName(sender),
+      text: getReplyPreviewText(message),
+      type: message.type || "text"
+    };
+
+  }
+
+  function getReplySenderName(replyTo) {
+
+    if (!replyTo) return "Someone";
+
+    const sender = getUserById(replyTo.senderId);
+
+    if (sender) {
+      return getDisplayName(sender);
+    }
+
+    return replyTo.senderName || replyTo.senderEmail?.split("@")[0] || "Someone";
+
+  }
+
   function getRoomPreview(room) {
 
     if (!room?.lastMessageSenderId) {
@@ -434,6 +494,97 @@ export default function ChatPage() {
       handleSelectRoom(room);
       notification.close();
     };
+
+  }
+
+  function getMessageReactionEntries(message) {
+
+    return Object.entries(message?.reactions || {})
+      .filter(([, emoji]) => availableReactionEmojis.includes(emoji))
+      .map(([uid, emoji]) => ({
+        uid,
+        emoji,
+        user: getUserById(uid) || {
+          uid,
+          email: "Unknown user",
+          username: "Unknown user",
+          photoURL: ""
+        }
+      }));
+
+  }
+
+  function getReactionCounts(message) {
+
+    const reactionEntries = getMessageReactionEntries(message);
+
+    return availableReactionEmojis
+      .map((emoji) => ({
+        emoji,
+        count: reactionEntries.filter((reaction) => reaction.emoji === emoji).length
+      }))
+      .filter((reactionCount) => reactionCount.count > 0);
+
+  }
+
+  function getFilteredReactionEntries(message, activeEmoji) {
+
+    const reactionEntries = getMessageReactionEntries(message);
+
+    if (!activeEmoji || activeEmoji === "all") {
+      return reactionEntries;
+    }
+
+    return reactionEntries.filter((reaction) => reaction.emoji === activeEmoji);
+
+  }
+
+  async function handleToggleReaction(message, emoji) {
+
+    if (!selectedRoom || !message || message.isUnsent) return;
+
+    try {
+      setMessageActionError("");
+
+      if (message.reactions?.[currentUser.uid] === emoji) {
+        await removeMessageReaction(selectedRoom.id, message.id, currentUser.uid);
+        return;
+      }
+
+      await setMessageReaction(selectedRoom.id, message.id, currentUser.uid, emoji);
+    } catch (err) {
+      setMessageActionError(err.message);
+    }
+
+  }
+
+  function handleOpenReactions(message) {
+
+    if (getMessageReactionEntries(message).length === 0) return;
+
+    setViewingReactions({
+      messageId: message.id,
+      activeEmoji: "all"
+    });
+
+  }
+
+  function handleCloseReactions() {
+
+    setViewingReactions(null);
+
+  }
+
+  function handleSelectReactionFilter(activeEmoji) {
+
+    setViewingReactions((currentReactions) => (
+      currentReactions
+        ? {
+            ...currentReactions,
+            activeEmoji
+          }
+        : currentReactions
+    ));
 
   }
 
@@ -908,6 +1059,8 @@ export default function ChatPage() {
 
       setEditingMessageText("");
 
+      setReplyingToMessage(null);
+
       setMessageActionError("");
 
       try {
@@ -937,6 +1090,8 @@ export default function ChatPage() {
 
     setEditingMessageText("");
 
+    setReplyingToMessage(null);
+
     setMessageActionError("");
 
     try {
@@ -964,6 +1119,8 @@ export default function ChatPage() {
     setEditingMessageId(null);
 
     setEditingMessageText("");
+
+    setReplyingToMessage(null);
 
     setMessageActionError("");
 
@@ -1000,14 +1157,36 @@ export default function ChatPage() {
 
     if (!selectedRoom || !messageText.trim()) return;
 
-    await sendMessage(selectedRoom.id, currentUser, messageText);
+    const replyTo = replyingToMessage
+      ? getReplySnapshot(replyingToMessage)
+      : null;
+
+    await sendMessage(selectedRoom.id, currentUser, messageText, replyTo);
 
     setMessageText("");
+
+    setReplyingToMessage(null);
 
     jumpMessagesToBottom({
       retries: 2,
       interval: 80
     });
+
+  }
+
+  function handleStartReply(message) {
+
+    if (!message || message.isUnsent) return;
+
+    setReplyingToMessage(message);
+
+    setMessageActionError("");
+
+  }
+
+  function handleCancelReply() {
+
+    setReplyingToMessage(null);
 
   }
 
@@ -1047,6 +1226,8 @@ export default function ChatPage() {
         imageName: file.name || "Pasted image",
         imageSize: file.size
       });
+
+      setReplyingToMessage(null);
     } catch (err) {
       setMessageActionError(err.message);
     } finally {
@@ -1319,6 +1500,8 @@ export default function ChatPage() {
                     const isOwnMessage = message.senderId === currentUser.uid;
                     const canEditMessage = isOwnMessage && !message.isUnsent && message.type === "text";
                     const canUnsendMessage = isOwnMessage && !message.isUnsent;
+                    const currentUserReaction = message.reactions?.[currentUser.uid] || "";
+                    const reactionCounts = getReactionCounts(message);
 
                     return (
                       <article
@@ -1338,6 +1521,19 @@ export default function ChatPage() {
                           <span className="message-sender">
                             {getDisplayName(sender)}
                           </span>
+
+                          {
+                            !message.isUnsent && message.replyTo && (
+                              <button
+                                className="message-reply-preview"
+                                type="button"
+                                onClick={() => handleJumpToMessage(message.replyTo.messageId)}
+                              >
+                                <strong>{getReplySenderName(message.replyTo)}</strong>
+                                <span>{message.replyTo.text || "Message"}</span>
+                              </button>
+                            )
+                          }
 
                           {
                             message.isUnsent ? (
@@ -1380,8 +1576,53 @@ export default function ChatPage() {
                           }
 
                           {
-                            canUnsendMessage && editingMessageId !== message.id && (
+                            !message.isUnsent && (
+                              <div className="reaction-area">
+                                <div className="reaction-picker" aria-label="Message reactions">
+                                  {
+                                    availableReactionEmojis.map((emoji) => (
+                                      <button
+                                        className={`reaction-button ${currentUserReaction === emoji ? "active" : ""}`}
+                                        type="button"
+                                        key={emoji}
+                                        onClick={() => handleToggleReaction(message, emoji)}
+                                        aria-label={`React with ${emoji}`}
+                                      >
+                                        {emoji}
+                                      </button>
+                                    ))
+                                  }
+                                </div>
+
+                                {
+                                  reactionCounts.length > 0 && (
+                                    <button
+                                      className="reaction-summary"
+                                      type="button"
+                                      onClick={() => handleOpenReactions(message)}
+                                      aria-label="View message reactions"
+                                    >
+                                      {
+                                        reactionCounts.map((reactionCount) => (
+                                          <span key={reactionCount.emoji}>
+                                            {reactionCount.emoji} {reactionCount.count}
+                                          </span>
+                                        ))
+                                      }
+                                    </button>
+                                  )
+                                }
+                              </div>
+                            )
+                          }
+
+                          {
+                            !message.isUnsent && editingMessageId !== message.id && (
                               <div className="message-actions">
+                                <button type="button" onClick={() => handleStartReply(message)}>
+                                  Reply
+                                </button>
+
                                 {
                                   canEditMessage && (
                                     <button type="button" onClick={() => handleStartEditMessage(message)}>
@@ -1390,9 +1631,13 @@ export default function ChatPage() {
                                   )
                                 }
 
-                                <button type="button" onClick={() => handleUnsendMessage(message)}>
-                                  Unsend
-                                </button>
+                                {
+                                  canUnsendMessage && (
+                                    <button type="button" onClick={() => handleUnsendMessage(message)}>
+                                      Unsend
+                                    </button>
+                                  )
+                                }
                               </div>
                             )
                           }
@@ -1402,6 +1647,21 @@ export default function ChatPage() {
                   })
                 }
               </div>
+
+              {
+                replyingToMessage && (
+                  <div className="reply-composer">
+                    <div>
+                      <span>Replying to {getReplySenderName(getReplySnapshot(replyingToMessage))}</span>
+                      <strong>{getReplyPreviewText(replyingToMessage)}</strong>
+                    </div>
+
+                    <button type="button" onClick={handleCancelReply}>
+                      Cancel
+                    </button>
+                  </div>
+                )
+              }
 
               <form className="message-form" onSubmit={handleSendMessage}>
                 <input
@@ -1952,6 +2212,83 @@ export default function ChatPage() {
                   <span>Address</span>
                   <strong>{viewingProfileUser.address || "Not provided"}</strong>
                 </div>
+              </div>
+            </section>
+          </div>
+        )
+      }
+
+      {
+        viewingReactions && viewingReactionMessage && !viewingReactionMessage.isUnsent && (
+          <div className="modal-backdrop" role="presentation" onMouseDown={handleCloseReactions}>
+            <section
+              className="profile-modal reaction-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="reaction-modal-title"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <div>
+                  <p className="eyebrow">Message</p>
+                  <h2 id="reaction-modal-title">Message Reactions</h2>
+                </div>
+
+                <button className="modal-close" type="button" onClick={handleCloseReactions}>
+                  Close
+                </button>
+              </div>
+
+              <div className="reaction-modal-tabs">
+                <button
+                  className={viewingReactions.activeEmoji === "all" ? "active" : ""}
+                  type="button"
+                  onClick={() => handleSelectReactionFilter("all")}
+                >
+                  All {getMessageReactionEntries(viewingReactionMessage).length}
+                </button>
+
+                {
+                  getReactionCounts(viewingReactionMessage).map((reactionCount) => (
+                    <button
+                      className={viewingReactions.activeEmoji === reactionCount.emoji ? "active" : ""}
+                      type="button"
+                      key={reactionCount.emoji}
+                      onClick={() => handleSelectReactionFilter(reactionCount.emoji)}
+                    >
+                      {reactionCount.emoji} {reactionCount.count}
+                    </button>
+                  ))
+                }
+              </div>
+
+              <div className="reaction-user-list">
+                {
+                  getFilteredReactionEntries(
+                    viewingReactionMessage,
+                    viewingReactions.activeEmoji
+                  ).length === 0 ? (
+                    <p className="empty-copy">No reactions found.</p>
+                  ) : (
+                    getFilteredReactionEntries(
+                      viewingReactionMessage,
+                      viewingReactions.activeEmoji
+                    ).map((reaction) => (
+                      <div className="reaction-user-row" key={reaction.uid}>
+                        {renderAvatar(reaction.user)}
+
+                        <span>
+                          <strong>
+                            {reaction.uid === currentUser.uid ? "You" : getDisplayName(reaction.user)}
+                          </strong>
+                          <small>{reaction.user.email || "Not provided"}</small>
+                        </span>
+
+                        <span className="reaction-user-emoji">{reaction.emoji}</span>
+                      </div>
+                    ))
+                  )
+                }
               </div>
             </section>
           </div>

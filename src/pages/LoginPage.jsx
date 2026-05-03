@@ -2,15 +2,19 @@ import { useRef, useState } from "react";
 
 import useAuth from "../hooks/useAuth";
 
+import { createUserDocument } from "../firebase/userService";
+
 export default function LoginPage() {
 
   const emailRef = useRef();
 
   const passwordRef = useRef();
 
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
 
   const [error, setError] = useState("");
+
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   async function handleSubmit(e) {
 
@@ -30,6 +34,29 @@ export default function LoginPage() {
     } catch (err) {
 
       setError(err.message);
+
+    }
+  }
+
+  async function handleGoogleSignIn() {
+
+    try {
+
+      setError("");
+
+      setIsGoogleLoading(true);
+
+      const result = await loginWithGoogle();
+
+      await createUserDocument(result.user);
+
+    } catch (err) {
+
+      setError(err.message);
+
+    } finally {
+
+      setIsGoogleLoading(false);
 
     }
   }
@@ -69,6 +96,20 @@ export default function LoginPage() {
           Sign in
         </button>
       </form>
+
+      <div className="auth-divider">
+        <span>or</span>
+      </div>
+
+      <button
+        className="google-submit"
+        type="button"
+        onClick={handleGoogleSignIn}
+        disabled={isGoogleLoading}
+      >
+        <span aria-hidden="true">G</span>
+        {isGoogleLoading ? "Signing in..." : "Sign in with Google"}
+      </button>
     </div>
   );
 }

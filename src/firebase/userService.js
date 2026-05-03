@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDoc,
   onSnapshot,
   query,
   orderBy,
@@ -12,25 +13,62 @@ import { db } from "./firebase";
 
 export async function createUserDocument(user) {
 
-  await setDoc(doc(db, "users", user.uid), {
+  const userRef = doc(db, "users", user.uid);
+
+  const userSnapshot = await getDoc(userRef);
+
+  const email = user.email || "";
+
+  const defaultUserData = {
 
     uid: user.uid,
 
-    email: user.email,
+    email,
 
-    username: user.email.split("@")[0],
+    username: user.displayName || email.split("@")[0] || "User",
 
-    photoURL: "",
+    photoURL: user.photoURL || "",
 
     phoneNumber: "",
 
     address: "",
 
-    blockedUsers: [],
+    blockedUsers: []
 
-    createdAt: serverTimestamp()
+  };
 
-  });
+  if (!userSnapshot.exists()) {
+
+    await setDoc(userRef, {
+
+      ...defaultUserData,
+
+      createdAt: serverTimestamp()
+
+    });
+
+    return;
+
+  }
+
+  const existingUserData = userSnapshot.data();
+
+  const missingUserData = Object.entries(defaultUserData).reduce(
+    (nextData, [key, value]) => {
+      if (existingUserData[key] === undefined) {
+        nextData[key] = value;
+      }
+
+      return nextData;
+    },
+    {}
+  );
+
+  if (Object.keys(missingUserData).length > 0) {
+
+    await setDoc(userRef, missingUserData, { merge: true });
+
+  }
 }
 
 export async function updateUserProfile(uid, profileData) {

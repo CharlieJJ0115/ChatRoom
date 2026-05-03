@@ -36,6 +36,16 @@ const emptyRoomSettingsForm = {
 
 const maxImageSizeBytes = 750 * 1024;
 
+function getBrowserNotificationPermission() {
+
+  if (typeof window === "undefined" || !("Notification" in window)) {
+    return "unsupported";
+  }
+
+  return Notification.permission;
+
+}
+
 export default function ChatPage() {
 
   const { currentUser, logout } = useAuth();
@@ -96,6 +106,10 @@ export default function ChatPage() {
 
   const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState(false);
 
+  const [notificationPermission, setNotificationPermission] = useState(
+    getBrowserNotificationPermission
+  );
+
   const messageRefs = useRef({});
 
   const chatHeaderRef = useRef();
@@ -105,6 +119,12 @@ export default function ChatPage() {
   const shouldScrollToBottomOnLoadRef = useRef(false);
 
   const isSettlingInitialScrollRef = useRef(false);
+
+  const roomNotificationActivityRef = useRef({});
+
+  const hasSeededNotificationActivityRef = useRef(false);
+
+  const selectedRoomIdRef = useRef(null);
 
   const imageInputRef = useRef();
 
@@ -139,6 +159,39 @@ export default function ChatPage() {
     return unsubscribe;
 
   }, [currentUser]);
+
+  useEffect(() => {
+
+    roomNotificationActivityRef.current = {};
+    hasSeededNotificationActivityRef.current = false;
+
+  }, [currentUser?.uid]);
+
+  useEffect(() => {
+
+    selectedRoomIdRef.current = selectedRoomId;
+
+  }, [selectedRoomId]);
+
+  useEffect(() => {
+
+    function syncNotificationPermission() {
+
+      setNotificationPermission(getBrowserNotificationPermission());
+
+    }
+
+    syncNotificationPermission();
+
+    window.addEventListener("focus", syncNotificationPermission);
+    document.addEventListener("visibilitychange", syncNotificationPermission);
+
+    return () => {
+      window.removeEventListener("focus", syncNotificationPermission);
+      document.removeEventListener("visibilitychange", syncNotificationPermission);
+    };
+
+  }, []);
 
   useEffect(() => {
 
@@ -185,6 +238,41 @@ export default function ChatPage() {
     shouldScrollToBottomOnLoadRef.current = false;
 
   }, [messages.length, selectedRoomId]);
+
+  useEffect(() => {
+
+    if (!currentUser) return;
+
+    const nextActivity = {};
+
+    chatrooms.forEach((room) => {
+      nextActivity[room.id] = getTimestampMillis(room.lastMessageAt);
+    });
+
+    if (!hasSeededNotificationActivityRef.current) {
+      roomNotificationActivityRef.current = nextActivity;
+      hasSeededNotificationActivityRef.current = true;
+      return;
+    }
+
+    chatrooms.forEach((room) => {
+      const latestMessageTime = nextActivity[room.id];
+      const previousMessageTime = roomNotificationActivityRef.current[room.id] || 0;
+
+      roomNotificationActivityRef.current[room.id] = latestMessageTime;
+
+      if (!latestMessageTime || latestMessageTime <= previousMessageTime) return;
+      if (!previousMessageTime) return;
+      if (room.lastMessageSenderId === currentUser.uid) return;
+      if (
+        room.id === selectedRoomIdRef.current &&
+        document.visibilityState === "visible"
+      ) return;
+
+      showIncomingMessageNotification(room);
+    });
+
+  }, [chatrooms, currentUser]);
 
   if (!currentUser) {
 
@@ -284,6 +372,68 @@ export default function ChatPage() {
     }
 
     return `${senderName}: ${messageText}`;
+
+  }
+
+  function getNotificationButtonLabel() {
+
+    if (notificationPermission === "unsupported") {
+      return "Notifications Unsupported";
+    }
+
+    if (notificationPermission === "granted") {
+      return "Notifications Enabled";
+    }
+
+    if (notificationPermission === "denied") {
+      return "Notifications Blocked";
+    }
+
+    return "Enable Notifications";
+
+  }
+
+  async function handleRequestNotifications() {
+
+    if (getBrowserNotificationPermission() === "unsupported") {
+      setNotificationPermission("unsupported");
+      return;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+
+      setNotificationPermission(permission);
+    } catch {
+      setNotificationPermission(getBrowserNotificationPermission());
+    }
+
+  }
+
+  function showIncomingMessageNotification(room) {
+
+    if (getBrowserNotificationPermission() !== "granted") return;
+
+    const senderName = getSenderDisplayName(
+      room.lastMessageSenderId,
+      room.lastMessageSenderEmail
+    );
+
+    const body = room.lastMessageType === "image"
+      ? `${senderName} sent an image`
+      : `${senderName}: ${room.lastMessageText || room.lastMessage || "New message"}`;
+
+    const notification = new Notification(room.name || "Chatroom", {
+      body,
+      icon: "/favicon.svg",
+      tag: `chatroom-${room.id}`
+    });
+
+    notification.onclick = () => {
+      window.focus();
+      handleSelectRoom(room);
+      notification.close();
+    };
 
   }
 
@@ -1045,6 +1195,15 @@ export default function ChatPage() {
 
             <button className="ghost-button" type="button" onClick={handleLogout}>
               Logout
+            </button>
+
+            <button
+              className="ghost-button notification-button"
+              type="button"
+              onClick={handleRequestNotifications}
+              disabled={notificationPermission !== "default"}
+            >
+              {getNotificationButtonLabel()}
             </button>
 
             <button

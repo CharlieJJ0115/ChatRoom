@@ -381,6 +381,10 @@ h3 {
   grid-column: 1 / -1;
 }
 
+.profile-actions .notification-button {
+  grid-column: 1 / -1;
+}
+
 .ghost-button,
 .primary-button,
 .secondary-button,

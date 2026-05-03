@@ -69,6 +69,8 @@ export default function ChatPage() {
 
   const [createRoomError, setCreateRoomError] = useState("");
 
+  const [createUserSearchQuery, setCreateUserSearchQuery] = useState("");
+
   const [inviteUserIds, setInviteUserIds] = useState([]);
 
   const [selectedRoomId, setSelectedRoomId] = useState(null);
@@ -172,6 +174,22 @@ export default function ChatPage() {
   const availableInviteUsers = selectedRoom
     ? selectableUsers.filter((user) => !selectedRoom.members?.includes(user.uid))
     : [];
+
+  const normalizedCreateUserSearchQuery = createUserSearchQuery.trim().toLowerCase();
+
+  const filteredCreateUsers = normalizedCreateUserSearchQuery
+    ? selectableUsers.filter((user) => {
+        const searchableText = [
+          user.username,
+          user.email
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(normalizedCreateUserSearchQuery);
+      })
+    : selectableUsers;
 
   useEffect(() => {
 
@@ -913,6 +931,7 @@ export default function ChatPage() {
     setNewRoomName("");
     setSelectedUserIds([]);
     setPrivateUserId("");
+    setCreateUserSearchQuery("");
     setCreateRoomError("");
 
     setIsCreateRoomModalOpen(true);
@@ -927,6 +946,7 @@ export default function ChatPage() {
     setNewRoomType("group");
     setPrivateUserId("");
     setSelectedUserIds([]);
+    setCreateUserSearchQuery("");
 
   }
 
@@ -2119,6 +2139,26 @@ export default function ChatPage() {
                   )
                 }
 
+                <div className="create-user-search">
+                  <input
+                    type="search"
+                    placeholder="Search registered users by name or Gmail"
+                    value={createUserSearchQuery}
+                    onChange={(e) => setCreateUserSearchQuery(e.target.value)}
+                  />
+
+                  {
+                    createUserSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setCreateUserSearchQuery("")}
+                      >
+                        Clear
+                      </button>
+                    )
+                  }
+                </div>
+
                 <div className="member-picker create-room-member-picker">
                   <h3>{newRoomType === "private" ? "Select User" : "Add Members"}</h3>
 
@@ -2129,7 +2169,13 @@ export default function ChatPage() {
                   }
 
                   {
-                    selectableUsers.map((user) => (
+                    selectableUsers.length > 0 && filteredCreateUsers.length === 0 && (
+                      <p className="empty-copy">No matching users found.</p>
+                    )
+                  }
+
+                  {
+                    filteredCreateUsers.map((user) => (
                       <label
                         className={`member-option ${newRoomType === "private" && privateUserId === user.uid ? "selected" : ""}`}
                         key={user.uid}

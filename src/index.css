@@ -1321,6 +1321,46 @@ h3 {
   background: #ffffff;
 }
 
+.create-user-search {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-muted);
+}
+
+.create-user-search input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  background: #ffffff;
+  outline: none;
+}
+
+.create-user-search input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.create-user-search button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 10px;
+  color: var(--accent);
+  background: #ffffff;
+  font-weight: 800;
+}
+
+.create-user-search button:hover {
+  color: #ffffff;
+  background: var(--accent);
+}
+
 .member-picker {
   margin-top: 18px;
 }

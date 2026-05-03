@@ -710,6 +710,18 @@ h3 {
   justify-content: flex-end;
 }
 
+.message-bubble-stack {
+  display: flex;
+  max-width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.message-row.own .message-bubble-stack {
+  align-items: flex-end;
+}
+
 .message-row.highlighted .message-bubble {
   outline: 3px solid rgba(37, 99, 235, 0.35);
   outline-offset: 3px;
@@ -814,17 +826,17 @@ h3 {
   display: grid;
   width: 100%;
   gap: 3px;
-  border: 0;
+  border: 1px solid rgba(148, 163, 184, 0.22);
   border-left: 3px solid var(--accent);
   border-radius: 6px;
   padding: 7px 9px;
   color: var(--text);
-  background: rgba(255, 255, 255, 0.78);
+  background: #f8fafc;
   text-align: left;
 }
 
 .message-reply-preview:hover {
-  background: #ffffff;
+  background: #f1f5f9;
 }
 
 .message-reply-preview strong,
@@ -846,11 +858,11 @@ h3 {
 
 .message-row.own .message-reply-preview {
   border-left-color: var(--accent);
-  background: rgba(255, 255, 255, 0.78);
+  background: #f8fafc;
 }
 
 .message-row.own .message-reply-preview:hover {
-  background: #ffffff;
+  background: #f1f5f9;
 }
 
 .message-row.own .message-reply-preview strong,
@@ -1012,7 +1024,7 @@ h3 {
 }
 
 .message-row.own .reaction-summary {
-  margin-right: 4px;
+  margin-right: -4px;
 }
 
 .reaction-summary:hover {

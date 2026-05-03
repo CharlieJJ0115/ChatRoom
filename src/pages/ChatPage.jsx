@@ -1663,48 +1663,69 @@ export default function ChatPage() {
                               )
                             }
 
-                            <div className={`message-bubble ${message.type === "image" && !message.isUnsent ? "image-message-bubble" : ""}`}>
-                              <span className="message-sender">
-                                {getDisplayName(sender)}
-                              </span>
+                            <div className="message-bubble-stack">
+                              <div className={`message-bubble ${message.type === "image" && !message.isUnsent ? "image-message-bubble" : ""}`}>
+                                <span className="message-sender">
+                                  {getDisplayName(sender)}
+                                </span>
+
+                                {
+                                  message.isUnsent ? (
+                                    <p className="message-unsent">This message was unsent.</p>
+                                  ) : message.type === "image" ? (
+                                    <button
+                                      className="message-image-button"
+                                      type="button"
+                                      onClick={() => handleOpenImagePreview(message)}
+                                    >
+                                      <img
+                                        className="message-image"
+                                        src={message.imageData}
+                                        alt={message.imageName || "Sent image"}
+                                        onLoad={handleMessageImageLoad}
+                                      />
+                                    </button>
+                                  ) : editingMessageId === message.id ? (
+                                    <form
+                                      className="edit-message-form"
+                                      onSubmit={(e) => handleSaveEditMessage(e, message.id)}
+                                    >
+                                      <input
+                                        type="text"
+                                        value={editingMessageText}
+                                        onChange={(e) => setEditingMessageText(e.target.value)}
+                                        autoFocus
+                                      />
+
+                                      <div className="edit-message-actions">
+                                        <button type="submit">Save</button>
+                                        <button type="button" onClick={handleCancelEditMessage}>
+                                          Cancel
+                                        </button>
+                                      </div>
+                                    </form>
+                                  ) : (
+                                    <p>{message.text}</p>
+                                  )
+                                }
+                              </div>
 
                               {
-                                message.isUnsent ? (
-                                  <p className="message-unsent">This message was unsent.</p>
-                                ) : message.type === "image" ? (
+                                !message.isUnsent && reactionCounts.length > 0 && (
                                   <button
-                                    className="message-image-button"
+                                    className="reaction-summary"
                                     type="button"
-                                    onClick={() => handleOpenImagePreview(message)}
+                                    onClick={() => handleOpenReactions(message)}
+                                    aria-label="View message reactions"
                                   >
-                                    <img
-                                      className="message-image"
-                                      src={message.imageData}
-                                      alt={message.imageName || "Sent image"}
-                                      onLoad={handleMessageImageLoad}
-                                    />
+                                    {
+                                      reactionCounts.map((reactionCount) => (
+                                        <span key={reactionCount.emoji}>
+                                          {reactionCount.emoji} {reactionCount.count}
+                                        </span>
+                                      ))
+                                    }
                                   </button>
-                                ) : editingMessageId === message.id ? (
-                                  <form
-                                    className="edit-message-form"
-                                    onSubmit={(e) => handleSaveEditMessage(e, message.id)}
-                                  >
-                                    <input
-                                      type="text"
-                                      value={editingMessageText}
-                                      onChange={(e) => setEditingMessageText(e.target.value)}
-                                      autoFocus
-                                    />
-
-                                    <div className="edit-message-actions">
-                                      <button type="submit">Save</button>
-                                      <button type="button" onClick={handleCancelEditMessage}>
-                                        Cancel
-                                      </button>
-                                    </div>
-                                  </form>
-                                ) : (
-                                  <p>{message.text}</p>
                                 )
                               }
                             </div>
@@ -1756,24 +1777,6 @@ export default function ChatPage() {
                             }
                           </div>
 
-                          {
-                            !message.isUnsent && reactionCounts.length > 0 && (
-                              <button
-                                className="reaction-summary"
-                                type="button"
-                                onClick={() => handleOpenReactions(message)}
-                                aria-label="View message reactions"
-                              >
-                                {
-                                  reactionCounts.map((reactionCount) => (
-                                    <span key={reactionCount.emoji}>
-                                      {reactionCount.emoji} {reactionCount.count}
-                                    </span>
-                                  ))
-                                }
-                              </button>
-                            )
-                          }
                         </div>
                       </article>
                     );

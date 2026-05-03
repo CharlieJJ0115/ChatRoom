@@ -1,5 +1,7 @@
 import {
   collection,
+  arrayRemove,
+  arrayUnion,
   doc,
   getDoc,
   onSnapshot,
@@ -84,6 +86,32 @@ export async function updateUserProfile(uid, profileData) {
     phoneNumber: profileData.phoneNumber,
 
     address: profileData.address,
+
+    updatedAt: serverTimestamp()
+
+  }, { merge: true });
+}
+
+export async function blockUser(currentUid, targetUid) {
+
+  if (!currentUid || !targetUid || currentUid === targetUid) return;
+
+  await setDoc(doc(db, "users", currentUid), {
+
+    blockedUsers: arrayUnion(targetUid),
+
+    updatedAt: serverTimestamp()
+
+  }, { merge: true });
+}
+
+export async function unblockUser(currentUid, targetUid) {
+
+  if (!currentUid || !targetUid || currentUid === targetUid) return;
+
+  await setDoc(doc(db, "users", currentUid), {
+
+    blockedUsers: arrayRemove(targetUid),
 
     updatedAt: serverTimestamp()
 

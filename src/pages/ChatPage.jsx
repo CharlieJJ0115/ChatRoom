@@ -18,7 +18,9 @@ import {
 } from "../firebase/chatroomService";
 
 import {
+  blockUser,
   subscribeUsers,
+  unblockUser,
   updateUserProfile
 } from "../firebase/userService";
 
@@ -119,6 +121,10 @@ export default function ChatPage() {
 
   const [viewingProfileUser, setViewingProfileUser] = useState(null);
 
+  const [profileActionError, setProfileActionError] = useState("");
+
+  const [isUpdatingBlock, setIsUpdatingBlock] = useState(false);
+
   const [viewingImageMessage, setViewingImageMessage] = useState(null);
 
   const [viewingReactions, setViewingReactions] = useState(null);
@@ -161,7 +167,23 @@ export default function ChatPage() {
 
   const currentUserProfile = users.find((user) => user.uid === currentUser?.uid);
 
+  const blockedUserIds = Array.isArray(currentUserProfile?.blockedUsers)
+    ? currentUserProfile.blockedUsers
+    : [];
+
+  const blockedByUserIds = users
+    .filter((user) => Array.isArray(user.blockedUsers) && user.blockedUsers.includes(currentUser?.uid))
+    .map((user) => user.uid);
+
+  const mutuallyBlockedUserIds = Array.from(new Set([
+    ...blockedUserIds,
+    ...blockedByUserIds
+  ]));
+
   const selectableUsers = users.filter((user) => user.uid !== currentUser?.uid);
+
+  const selectableUnblockedUsers = selectableUsers
+    .filter((user) => !isMutuallyBlocked(user.uid));
 
   const validRoomMembers = selectedRoom
     ? users.filter((user) => selectedRoom.members?.includes(user.uid))
@@ -172,13 +194,13 @@ export default function ChatPage() {
     : [];
 
   const availableInviteUsers = selectedRoom
-    ? selectableUsers.filter((user) => !selectedRoom.members?.includes(user.uid))
+    ? selectableUnblockedUsers.filter((user) => !selectedRoom.members?.includes(user.uid))
     : [];
 
   const normalizedCreateUserSearchQuery = createUserSearchQuery.trim().toLowerCase();
 
   const filteredCreateUsers = normalizedCreateUserSearchQuery
-    ? selectableUsers.filter((user) => {
+    ? selectableUnblockedUsers.filter((user) => {
         const searchableText = [
           user.username,
           user.email
@@ -189,7 +211,7 @@ export default function ChatPage() {
 
         return searchableText.includes(normalizedCreateUserSearchQuery);
       })
-    : selectableUsers;
+    : selectableUnblockedUsers;
 
   useEffect(() => {
 
@@ -354,6 +376,24 @@ export default function ChatPage() {
     }
 
     return users.find((user) => user.uid === uid);
+
+  }
+
+  function isBlockedByMe(uid) {
+
+    return Boolean(uid && blockedUserIds.includes(uid));
+
+  }
+
+  function hasBlockedMe(uid) {
+
+    return Boolean(uid && blockedByUserIds.includes(uid));
+
+  }
+
+  function isMutuallyBlocked(uid) {
+
+    return Boolean(uid && mutuallyBlockedUserIds.includes(uid));
 
   }
 
@@ -847,6 +887,8 @@ export default function ChatPage() {
 
     if (!user || user.uid === currentUser.uid) return;
 
+    setProfileActionError("");
+
     setViewingProfileUser(user);
 
   }
@@ -854,6 +896,42 @@ export default function ChatPage() {
   function handleCloseReadonlyProfile() {
 
     setViewingProfileUser(null);
+
+    setProfileActionError("");
+
+  }
+
+  async function handleBlockViewingUser() {
+
+    if (!viewingProfileUser || viewingProfileUser.uid === currentUser.uid) return;
+
+    try {
+      setIsUpdatingBlock(true);
+      setProfileActionError("");
+
+      await blockUser(currentUser.uid, viewingProfileUser.uid);
+    } catch (err) {
+      setProfileActionError(err.message);
+    } finally {
+      setIsUpdatingBlock(false);
+    }
+
+  }
+
+  async function handleUnblockViewingUser() {
+
+    if (!viewingProfileUser || viewingProfileUser.uid === currentUser.uid) return;
+
+    try {
+      setIsUpdatingBlock(true);
+      setProfileActionError("");
+
+      await unblockUser(currentUser.uid, viewingProfileUser.uid);
+    } catch (err) {
+      setProfileActionError(err.message);
+    } finally {
+      setIsUpdatingBlock(false);
+    }
 
   }
 
@@ -1174,6 +1252,11 @@ export default function ChatPage() {
           return;
         }
 
+        if (isMutuallyBlocked(privateUserId)) {
+          setCreateRoomError("You cannot start a private chat with this user.");
+          return;
+        }
+
         const existingPrivateRoom = findExistingPrivateRoom(privateUserId);
 
         if (existingPrivateRoom) {
@@ -1365,6 +1448,11 @@ export default function ChatPage() {
 
     if (!selectedRoom || !messageText.trim()) return;
 
+    if (isPrivateChatBlocked) {
+      setMessageActionError(privateChatWarningText);
+      return;
+    }
+
     const replyTo = replyingToMessage
       ? getReplySnapshot(replyingToMessage)
       : null;
@@ -1385,6 +1473,11 @@ export default function ChatPage() {
   function handleStartReply(message) {
 
     if (!message || message.isUnsent) return;
+
+    if (isPrivateChatBlocked) {
+      setMessageActionError(privateChatWarningText);
+      return;
+    }
 
     setReplyingToMessage(message);
 
@@ -1416,6 +1509,11 @@ export default function ChatPage() {
   async function handleSendImageFile(file) {
 
     if (!selectedRoom || !file) return;
+
+    if (isPrivateChatBlocked) {
+      setMessageActionError(privateChatWarningText);
+      return;
+    }
 
     if (!file.type.startsWith("image/")) {
       setMessageActionError("Please choose an image file.");
@@ -1458,6 +1556,8 @@ export default function ChatPage() {
   }
 
   function handlePasteMessage(e) {
+
+    if (isPrivateChatBlocked) return;
 
     const imageItem = Array.from(e.clipboardData?.items || [])
       .find((item) => item.type.startsWith("image/"));
@@ -1554,11 +1654,37 @@ export default function ChatPage() {
 
   const selectedRoomPartner = getPrivateRoomPartner(selectedRoom);
 
+  const isPrivateChatBlocked = Boolean(
+    isSelectedRoomPrivate
+      && selectedRoomPartner?.uid
+      && isMutuallyBlocked(selectedRoomPartner.uid)
+  );
+
+  const privateChatWarningText = isPrivateChatBlocked
+    ? isBlockedByMe(selectedRoomPartner?.uid)
+      ? "You blocked this user. You can no longer chat."
+      : "This user blocked you. You can no longer chat."
+    : "";
+
+  function isBlockedMessage(message) {
+
+    return Boolean(
+      !isSelectedRoomPrivate
+        && message?.senderId
+        && message.senderId !== currentUser.uid
+        && isMutuallyBlocked(message.senderId)
+    );
+
+  }
+
+  const visibleMessages = messages;
+
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
   const searchResults = normalizedSearchQuery
     ? messages.filter((message) => {
         if (message.isUnsent) return false;
+        if (isBlockedMessage(message)) return false;
 
         const sender = getUserById(message.senderId) || {
           email: message.senderEmail,
@@ -1707,7 +1833,7 @@ export default function ChatPage() {
                     <div className="center-empty">
                       <h3>Loading messages...</h3>
                     </div>
-                  ) : messages.length === 0 && (
+                  ) : visibleMessages.length === 0 && (
                     <div className="center-empty">
                       <h3>No messages yet</h3>
                       <p>Send the first message to this chatroom.</p>
@@ -1716,7 +1842,25 @@ export default function ChatPage() {
                 }
 
                 {
-                  messages.map((message) => {
+                  visibleMessages.map((message) => {
+                    if (isBlockedMessage(message)) {
+                      return (
+                        <article
+                          className="blocked-message-row"
+                          key={message.id}
+                          ref={(element) => {
+                            if (element) {
+                              messageRefs.current[message.id] = element;
+                            }
+                          }}
+                        >
+                          <div className="blocked-message-placeholder">
+                            Message from a blocked user
+                          </div>
+                        </article>
+                      );
+                    }
+
                     const sender = getUserById(message.senderId) || {
                       email: message.senderEmail,
                       username: message.senderEmail
@@ -1959,7 +2103,15 @@ export default function ChatPage() {
               </div>
 
               {
-                replyingToMessage && (
+                isPrivateChatBlocked && (
+                  <div className="private-chat-warning" role="status">
+                    {privateChatWarningText}
+                  </div>
+                )
+              }
+
+              {
+                replyingToMessage && !isPrivateChatBlocked && (
                   <div className="reply-composer">
                     <div>
                       <span>Replying to {getReplySenderName(getReplySnapshot(replyingToMessage))}</span>
@@ -1986,7 +2138,7 @@ export default function ChatPage() {
                   className="image-upload-button"
                   type="button"
                   onClick={() => imageInputRef.current?.click()}
-                  disabled={isSendingImage}
+                  disabled={isSendingImage || isPrivateChatBlocked}
                 >
                   {isSendingImage ? "Uploading..." : "Image"}
                 </button>
@@ -1998,10 +2150,10 @@ export default function ChatPage() {
                   onChange={(e) => setMessageText(e.target.value)}
                   onPaste={handlePasteMessage}
                   onBlur={scrollChatHeaderIntoView}
-                  disabled={isSendingImage}
+                  disabled={isSendingImage || isPrivateChatBlocked}
                 />
 
-                <button type="submit" disabled={isSendingImage}>
+                <button type="submit" disabled={isSendingImage || isPrivateChatBlocked}>
                   Send
                 </button>
               </form>
@@ -2169,7 +2321,13 @@ export default function ChatPage() {
                   }
 
                   {
-                    selectableUsers.length > 0 && filteredCreateUsers.length === 0 && (
+                    selectableUsers.length > 0 && selectableUnblockedUsers.length === 0 && (
+                      <p className="empty-copy">No available users found.</p>
+                    )
+                  }
+
+                  {
+                    selectableUnblockedUsers.length > 0 && filteredCreateUsers.length === 0 && (
                       <p className="empty-copy">No matching users found.</p>
                     )
                   }
@@ -2577,8 +2735,20 @@ export default function ChatPage() {
                 <div>
                   <strong>{getDisplayName(viewingProfileUser)}</strong>
                   <small>{viewingProfileUser.email || "Not provided"}</small>
+                  {
+                    isBlockedByMe(viewingProfileUser.uid) && (
+                      <span className="block-status-badge">Blocked by you</span>
+                    )
+                  }
+                  {
+                    !isBlockedByMe(viewingProfileUser.uid) && hasBlockedMe(viewingProfileUser.uid) && (
+                      <span className="block-status-badge">This user blocked you</span>
+                    )
+                  }
                 </div>
               </div>
+
+              {profileActionError && <p className="form-error profile-action-error">{profileActionError}</p>}
 
               <div className="readonly-profile-details">
                 <div className="profile-detail-row">
@@ -2601,13 +2771,42 @@ export default function ChatPage() {
                   <strong>{viewingProfileUser.address || "Not provided"}</strong>
                 </div>
               </div>
+
+              <div className="profile-block-actions">
+                {
+                  isBlockedByMe(viewingProfileUser.uid) ? (
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      onClick={handleUnblockViewingUser}
+                      disabled={isUpdatingBlock}
+                    >
+                      {isUpdatingBlock ? "Updating..." : "Unblock User"}
+                    </button>
+                  ) : hasBlockedMe(viewingProfileUser.uid) ? (
+                    <p className="empty-copy">You cannot unblock this user because they blocked you.</p>
+                  ) : (
+                    <button
+                      className="danger-button"
+                      type="button"
+                      onClick={handleBlockViewingUser}
+                      disabled={isUpdatingBlock}
+                    >
+                      {isUpdatingBlock ? "Updating..." : "Block User"}
+                    </button>
+                  )
+                }
+              </div>
             </section>
           </div>
         )
       }
 
       {
-        viewingReactions && viewingReactionMessage && !viewingReactionMessage.isUnsent && (
+        viewingReactions
+        && viewingReactionMessage
+        && !viewingReactionMessage.isUnsent
+        && !isBlockedMessage(viewingReactionMessage) && (
           <div className="modal-backdrop" role="presentation" onMouseDown={handleCloseReactions}>
             <section
               className="profile-modal reaction-modal"

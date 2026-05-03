@@ -7,6 +7,7 @@ import {
   onSnapshot,
   orderBy,
   query,
+  setDoc,
   updateDoc,
   serverTimestamp
 } from "firebase/firestore";
@@ -17,7 +18,7 @@ export async function createChatroom(name, uid, memberUids = []) {
 
   const members = Array.from(new Set([uid, ...memberUids]));
 
-  await addDoc(collection(db, "chatrooms"), {
+  const chatroomRef = await addDoc(collection(db, "chatrooms"), {
 
     name,
 
@@ -50,6 +51,57 @@ export async function createChatroom(name, uid, memberUids = []) {
     }
 
   });
+
+  return chatroomRef.id;
+}
+
+export async function createPrivateChatroom(currentUid, targetUid) {
+
+  if (!currentUid || !targetUid || currentUid === targetUid) return "";
+
+  const members = [currentUid, targetUid];
+
+  const privateKey = [...members].sort().join("_");
+
+  const privateRoomRef = doc(db, "chatrooms", `private_${privateKey}`);
+
+  await setDoc(privateRoomRef, {
+
+    name: "",
+
+    type: "private",
+
+    privateKey,
+
+    photoURL: "",
+
+    members,
+
+    createdBy: currentUid,
+
+    createdAt: serverTimestamp(),
+
+    updatedAt: serverTimestamp(),
+
+    lastMessage: "",
+
+    lastMessageText: "",
+
+    lastMessageType: "",
+
+    lastMessageSenderId: "",
+
+    lastMessageSenderEmail: "",
+
+    lastMessageAt: null,
+
+    readBy: {
+      [currentUid]: serverTimestamp()
+    }
+
+  });
+
+  return privateRoomRef.id;
 }
 
 export async function addMembersToChatroom(roomId, memberUids = []) {

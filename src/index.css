@@ -1291,6 +1291,36 @@ h3 {
   background: var(--accent);
 }
 
+.room-type-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-muted);
+}
+
+.room-type-toggle button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 800;
+}
+
+.room-type-toggle button.active {
+  color: #ffffff;
+  background: var(--accent);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+}
+
+.room-type-toggle button:not(.active):hover {
+  color: var(--accent);
+  background: #ffffff;
+}
+
 .member-picker {
   margin-top: 18px;
 }
@@ -1334,8 +1364,13 @@ h3 {
   cursor: pointer;
 }
 
-.member-option:hover {
+.member-option:hover,
+.member-option.selected {
   background: var(--panel-muted);
+}
+
+.member-option.selected {
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.28);
 }
 
 .member-option input {
@@ -1355,6 +1390,12 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.private-room-settings {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
 }
 
 .small-avatar {

@@ -5,6 +5,7 @@ import useAuth from "../hooks/useAuth";
 import {
   addMembersToChatroom,
   createChatroom,
+  createPrivateChatroom,
   editMessage,
   markChatroomRead,
   removeMessageReaction,
@@ -61,6 +62,12 @@ export default function ChatPage() {
   const [selectedUserIds, setSelectedUserIds] = useState([]);
 
   const [newRoomName, setNewRoomName] = useState("");
+
+  const [newRoomType, setNewRoomType] = useState("group");
+
+  const [privateUserId, setPrivateUserId] = useState("");
+
+  const [createRoomError, setCreateRoomError] = useState("");
 
   const [inviteUserIds, setInviteUserIds] = useState([]);
 
@@ -412,6 +419,81 @@ export default function ChatPage() {
 
   }
 
+  function isPrivateRoom(room) {
+
+    return room?.type === "private";
+
+  }
+
+  function getPrivateRoomKey(uidA, uidB) {
+
+    if (!uidA || !uidB) return "";
+
+    return [uidA, uidB].sort().join("_");
+
+  }
+
+  function findExistingPrivateRoom(targetUid) {
+
+    const privateKey = getPrivateRoomKey(currentUser?.uid, targetUid);
+
+    if (!privateKey) return null;
+
+    return chatrooms.find((room) => (
+      isPrivateRoom(room) && room.privateKey === privateKey
+    )) || null;
+
+  }
+
+  function getPrivateRoomPartner(room) {
+
+    if (!isPrivateRoom(room) || !currentUser?.uid) return null;
+
+    const partnerUid = room.members?.find((uid) => uid !== currentUser.uid);
+
+    if (!partnerUid) return null;
+
+    return getUserById(partnerUid) || {
+      uid: partnerUid,
+      username: "Private Chat",
+      email: "",
+      photoURL: ""
+    };
+
+  }
+
+  function getRoomDisplayProfile(room) {
+
+    if (isPrivateRoom(room)) {
+      return getPrivateRoomPartner(room) || {
+        username: "Private Chat",
+        email: "",
+        photoURL: ""
+      };
+    }
+
+    return {
+      username: room?.name || "Chatroom",
+      email: "",
+      photoURL: room?.photoURL || ""
+    };
+
+  }
+
+  function getRoomDisplayName(room) {
+
+    const roomProfile = getRoomDisplayProfile(room);
+
+    return getDisplayName(roomProfile);
+
+  }
+
+  function getRoomDisplayPhotoURL(room) {
+
+    return getRoomDisplayProfile(room)?.photoURL || "";
+
+  }
+
   function getRoomPreview(room) {
 
     if (!room?.lastMessageSenderId) {
@@ -487,7 +569,7 @@ export default function ChatPage() {
       ? `${senderName} sent an image`
       : `${senderName}: ${room.lastMessageText || room.lastMessage || "New message"}`;
 
-    const notification = new Notification(room.name || "Chatroom", {
+    const notification = new Notification(getRoomDisplayName(room), {
       body,
       icon: "/favicon.svg",
       tag: `chatroom-${room.id}`
@@ -664,12 +746,14 @@ export default function ChatPage() {
 
   function renderRoomAvatar(room, className = "room-avatar") {
 
-    const roomName = room?.name || "Chatroom";
+    const roomName = getRoomDisplayName(room);
 
-    return room?.photoURL ? (
+    const roomPhotoURL = getRoomDisplayPhotoURL(room);
+
+    return roomPhotoURL ? (
       <img
         className={`${className} profile-image`}
-        src={room.photoURL}
+        src={roomPhotoURL}
         alt={roomName}
       />
     ) : (
@@ -825,6 +909,12 @@ export default function ChatPage() {
 
   function handleOpenCreateRoomModal() {
 
+    setNewRoomType("group");
+    setNewRoomName("");
+    setSelectedUserIds([]);
+    setPrivateUserId("");
+    setCreateRoomError("");
+
     setIsCreateRoomModalOpen(true);
 
   }
@@ -832,6 +922,26 @@ export default function ChatPage() {
   function handleCloseCreateRoomModal() {
 
     setIsCreateRoomModalOpen(false);
+    setCreateRoomError("");
+    setNewRoomName("");
+    setNewRoomType("group");
+    setPrivateUserId("");
+    setSelectedUserIds([]);
+
+  }
+
+  function handleSelectNewRoomType(roomType) {
+
+    setNewRoomType(roomType);
+    setCreateRoomError("");
+
+    if (roomType === "group") {
+      setPrivateUserId("");
+      return;
+    }
+
+    setSelectedUserIds([]);
+    setNewRoomName("");
 
   }
 
@@ -1035,23 +1145,63 @@ export default function ChatPage() {
 
   async function handleCreateRoom() {
 
-    const roomName = newRoomName.trim();
+    try {
+      setCreateRoomError("");
 
-    if (!roomName) return;
+      if (newRoomType === "private") {
+        if (!privateUserId) {
+          setCreateRoomError("Please select one user for private chat.");
+          return;
+        }
 
-    await createChatroom(
-      roomName,
-      currentUser.uid,
-      selectedUserIds
-    );
+        const existingPrivateRoom = findExistingPrivateRoom(privateUserId);
 
-    setNewRoomName("");
+        if (existingPrivateRoom) {
+          setSelectedRoomId(existingPrivateRoom.id);
+          setPrivateUserId("");
+          setSelectedUserIds([]);
+          setNewRoomName("");
+          setIsCreateRoomModalOpen(false);
+          return;
+        }
 
-    setSelectedUserIds([]);
+        const roomId = await createPrivateChatroom(currentUser.uid, privateUserId);
 
-    setIsCreateRoomModalOpen(false);
+        if (roomId) {
+          setSelectedRoomId(roomId);
+        }
 
-    alert("Chatroom Created!");
+        setPrivateUserId("");
+        setSelectedUserIds([]);
+        setNewRoomName("");
+        setIsCreateRoomModalOpen(false);
+        return;
+      }
+
+      const roomName = newRoomName.trim();
+
+      if (!roomName) {
+        setCreateRoomError("Room name is required.");
+        return;
+      }
+
+      const roomId = await createChatroom(
+        roomName,
+        currentUser.uid,
+        selectedUserIds
+      );
+
+      if (roomId) {
+        setSelectedRoomId(roomId);
+      }
+
+      setNewRoomName("");
+      setSelectedUserIds([]);
+      setPrivateUserId("");
+      setIsCreateRoomModalOpen(false);
+    } catch (err) {
+      setCreateRoomError(err.message);
+    }
 
   }
 
@@ -1380,6 +1530,10 @@ export default function ChatPage() {
 
   const visibleMemberCount = selectedRoom ? validRoomMembers.length : 0;
 
+  const isSelectedRoomPrivate = isPrivateRoom(selectedRoom);
+
+  const selectedRoomPartner = getPrivateRoomPartner(selectedRoom);
+
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
   const searchResults = normalizedSearchQuery
@@ -1470,7 +1624,7 @@ export default function ChatPage() {
                       {renderRoomAvatar(room)}
 
                       <span className="room-meta">
-                        <strong>{room.name}</strong>
+                        <strong>{getRoomDisplayName(room)}</strong>
                         <small>{getRoomPreview(room)}</small>
                       </span>
                     </button>
@@ -1497,7 +1651,7 @@ export default function ChatPage() {
                       Back
                     </button>
 
-                    <h2>{selectedRoom.name}</h2>
+                    <h2>{getRoomDisplayName(selectedRoom)}</h2>
                   </div>
 
                   <button
@@ -1509,7 +1663,7 @@ export default function ChatPage() {
                   </button>
 
                   <p className="eyebrow">Current Chatroom</p>
-                  <h2 className="desktop-chat-title">{selectedRoom.name}</h2>
+                  <h2 className="desktop-chat-title">{getRoomDisplayName(selectedRoom)}</h2>
                 </div>
 
                 <div className="chat-header-actions">
@@ -1933,16 +2087,40 @@ export default function ChatPage() {
               </div>
 
               <div className="create-room-modal-body">
-                <input
-                  className="room-name-input"
-                  type="text"
-                  placeholder="Room name"
-                  value={newRoomName}
-                  onChange={(e) => setNewRoomName(e.target.value)}
-                />
+                <div className="room-type-toggle" aria-label="Chatroom type">
+                  <button
+                    className={newRoomType === "group" ? "active" : ""}
+                    type="button"
+                    onClick={() => handleSelectNewRoomType("group")}
+                  >
+                    Group Chat
+                  </button>
+
+                  <button
+                    className={newRoomType === "private" ? "active" : ""}
+                    type="button"
+                    onClick={() => handleSelectNewRoomType("private")}
+                  >
+                    Private Chat
+                  </button>
+                </div>
+
+                {createRoomError && <p className="form-error">{createRoomError}</p>}
+
+                {
+                  newRoomType === "group" && (
+                    <input
+                      className="room-name-input"
+                      type="text"
+                      placeholder="Room name"
+                      value={newRoomName}
+                      onChange={(e) => setNewRoomName(e.target.value)}
+                    />
+                  )
+                }
 
                 <div className="member-picker create-room-member-picker">
-                  <h3>Add Members</h3>
+                  <h3>{newRoomType === "private" ? "Select User" : "Add Members"}</h3>
 
                   {
                     selectableUsers.length === 0 && (
@@ -1952,11 +2130,19 @@ export default function ChatPage() {
 
                   {
                     selectableUsers.map((user) => (
-                      <label className="member-option" key={user.uid}>
+                      <label
+                        className={`member-option ${newRoomType === "private" && privateUserId === user.uid ? "selected" : ""}`}
+                        key={user.uid}
+                      >
                         <input
-                          type="checkbox"
-                          checked={selectedUserIds.includes(user.uid)}
-                          onChange={() => handleSelectUser(user.uid)}
+                          type={newRoomType === "private" ? "radio" : "checkbox"}
+                          name={newRoomType === "private" ? "privateUser" : undefined}
+                          checked={newRoomType === "private" ? privateUserId === user.uid : selectedUserIds.includes(user.uid)}
+                          onChange={() => (
+                            newRoomType === "private"
+                              ? setPrivateUserId(user.uid)
+                              : handleSelectUser(user.uid)
+                          )}
                         />
 
                         {renderAvatar(user)}
@@ -1971,7 +2157,7 @@ export default function ChatPage() {
                 </div>
 
                 <button className="primary-button" onClick={handleCreateRoom}>
-                  Create Chatroom
+                  {newRoomType === "private" ? "Start Private Chat" : "Create Chatroom"}
                 </button>
               </div>
             </section>
@@ -2001,79 +2187,99 @@ export default function ChatPage() {
               </div>
 
               <div className="profile-preview">
-                {renderRoomAvatar(roomSettingsForm, "avatar profile-preview-avatar")}
+                {
+                  isSelectedRoomPrivate
+                    ? renderAvatar(selectedRoomPartner || getRoomDisplayProfile(selectedRoom), "avatar profile-preview-avatar")
+                    : renderRoomAvatar(roomSettingsForm, "avatar profile-preview-avatar")
+                }
                 <div>
-                  <strong>{roomSettingsForm.name || "Chatroom"}</strong>
-                  <small>{visibleMemberCount} members</small>
+                  <strong>
+                    {isSelectedRoomPrivate ? getRoomDisplayName(selectedRoom) : roomSettingsForm.name || "Chatroom"}
+                  </strong>
+                  <small>{isSelectedRoomPrivate ? "Private chat" : `${visibleMemberCount} members`}</small>
                 </div>
               </div>
 
               {roomSettingsError && <p className="form-error">{roomSettingsError}</p>}
 
-              <form className="profile-form" onSubmit={handleSaveRoomSettings}>
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={roomPictureInputRef}
-                  onChange={handleSelectRoomPicture}
-                  hidden
-                />
-
-                <label className="field-group">
-                  <span>Room name</span>
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Room name"
-                    value={roomSettingsForm.name}
-                    onChange={handleRoomSettingsChange}
-                    required
-                  />
-                </label>
-
-                <label className="field-group">
-                  <span>Chatroom picture URL</span>
-                  <input
-                    type="url"
-                    name="photoURL"
-                    placeholder="https://example.com/room.png"
-                    value={roomSettingsForm.photoURL}
-                    onChange={handleRoomSettingsChange}
-                  />
-                </label>
-
-                <div className="profile-upload-row">
-                  <button
-                    className="secondary-button"
-                    type="button"
-                    onClick={() => roomPictureInputRef.current?.click()}
-                  >
-                    Upload Image
-                  </button>
-
-                  <span>Image file, max 750KB</span>
-                </div>
-
-                <div className="room-settings-actions">
+              {
+                isSelectedRoomPrivate ? (
+                  <div className="private-room-settings">
                   <button className="secondary-button" type="button" onClick={handleOpenSearchFromSettings}>
                     Search Messages
                   </button>
 
-                  <button className="secondary-button" type="button" onClick={handleOpenMembersFromSettings}>
-                    Manage Members
-                  </button>
-                </div>
-
-                <div className="modal-actions">
                   <button className="secondary-button" type="button" onClick={handleCloseRoomSettings}>
-                    Cancel
+                    Close
                   </button>
+                  </div>
+                ) : (
+                  <form className="profile-form" onSubmit={handleSaveRoomSettings}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      ref={roomPictureInputRef}
+                      onChange={handleSelectRoomPicture}
+                      hidden
+                    />
 
-                  <button className="primary-button" type="submit" disabled={isSavingRoomSettings}>
-                    {isSavingRoomSettings ? "Saving..." : "Save Changes"}
-                  </button>
-                </div>
-              </form>
+                    <label className="field-group">
+                      <span>Room name</span>
+                      <input
+                        type="text"
+                        name="name"
+                        placeholder="Room name"
+                        value={roomSettingsForm.name}
+                        onChange={handleRoomSettingsChange}
+                        required
+                      />
+                    </label>
+
+                    <label className="field-group">
+                      <span>Chatroom picture URL</span>
+                      <input
+                        type="url"
+                        name="photoURL"
+                        placeholder="https://example.com/room.png"
+                        value={roomSettingsForm.photoURL}
+                        onChange={handleRoomSettingsChange}
+                      />
+                    </label>
+
+                    <div className="profile-upload-row">
+                      <button
+                        className="secondary-button"
+                        type="button"
+                        onClick={() => roomPictureInputRef.current?.click()}
+                      >
+                        Upload Image
+                      </button>
+
+                      <span>Image file, max 750KB</span>
+                    </div>
+
+                    <div className="room-settings-actions">
+                      <button className="secondary-button" type="button" onClick={handleOpenSearchFromSettings}>
+                        Search Messages
+                      </button>
+
+                      <button className="secondary-button" type="button" onClick={handleOpenMembersFromSettings}>
+                        Manage Members
+                      </button>
+                    </div>
+
+                    <div className="modal-actions">
+                      <button className="secondary-button" type="button" onClick={handleCloseRoomSettings}>
+                        Cancel
+                      </button>
+
+                      <button className="primary-button" type="submit" disabled={isSavingRoomSettings}>
+                        {isSavingRoomSettings ? "Saving..." : "Save Changes"}
+                      </button>
+                    </div>
+                  </form>
+                )
+              }
             </section>
           </div>
         )

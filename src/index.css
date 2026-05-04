@@ -439,7 +439,7 @@ h3 {
 .logout-icon-button:hover,
 .logout-icon-button:focus-visible {
   color: #ffffff;
-  background: var(--accent);
+  background: #dc2626;
   outline: none;
   transform: translateY(-1px);
 }

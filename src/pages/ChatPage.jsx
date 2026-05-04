@@ -43,6 +43,8 @@ const maxImageSizeBytes = 750 * 1024;
 
 const availableReactionEmojis = ["👍", "❤️", "😂", "😮", "😢"];
 
+const notificationMutedStorageKey = "midterm-chatroom-notifications-muted";
+
 function getBrowserNotificationPermission() {
 
   if (typeof window === "undefined" || !("Notification" in window)) {
@@ -50,6 +52,14 @@ function getBrowserNotificationPermission() {
   }
 
   return Notification.permission;
+
+}
+
+function getStoredNotificationMuted() {
+
+  if (typeof window === "undefined") return false;
+
+  return window.localStorage.getItem(notificationMutedStorageKey) === "true";
 
 }
 
@@ -135,6 +145,10 @@ export default function ChatPage() {
 
   const [notificationPermission, setNotificationPermission] = useState(
     getBrowserNotificationPermission
+  );
+
+  const [isNotificationMuted, setIsNotificationMuted] = useState(
+    getStoredNotificationMuted
   );
 
   const messageRefs = useRef({});
@@ -587,7 +601,7 @@ export default function ChatPage() {
     }
 
     if (notificationPermission === "granted") {
-      return "Notifications Enabled";
+      return isNotificationMuted ? "Notifications Off" : "Notifications Enabled";
     }
 
     if (notificationPermission === "denied") {
@@ -605,10 +619,30 @@ export default function ChatPage() {
       return;
     }
 
+    if (getBrowserNotificationPermission() === "granted") {
+      setIsNotificationMuted((currentMuted) => {
+        const nextMuted = !currentMuted;
+
+        window.localStorage.setItem(
+          notificationMutedStorageKey,
+          String(nextMuted)
+        );
+
+        return nextMuted;
+      });
+
+      return;
+    }
+
     try {
       const permission = await Notification.requestPermission();
 
       setNotificationPermission(permission);
+
+      if (permission === "granted") {
+        setIsNotificationMuted(false);
+        window.localStorage.setItem(notificationMutedStorageKey, "false");
+      }
     } catch {
       setNotificationPermission(getBrowserNotificationPermission());
     }
@@ -616,6 +650,8 @@ export default function ChatPage() {
   }
 
   function showIncomingMessageNotification(room) {
+
+    if (isNotificationMuted) return;
 
     if (getBrowserNotificationPermission() !== "granted") return;
 
@@ -1750,7 +1786,10 @@ export default function ChatPage() {
               className="ghost-button notification-button"
               type="button"
               onClick={handleRequestNotifications}
-              disabled={notificationPermission !== "default"}
+              disabled={
+                notificationPermission === "unsupported" ||
+                notificationPermission === "denied"
+              }
             >
               {getNotificationButtonLabel()}
             </button>

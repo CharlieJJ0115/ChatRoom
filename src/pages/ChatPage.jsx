@@ -807,6 +807,14 @@ export default function ChatPage() {
 
   }
 
+  const unreadChatroomCount = chatrooms.filter(isRoomUnread).length;
+
+  const isNotificationToggleOn = notificationPermission === "granted" && !isNotificationMuted;
+
+  const shouldShowNotificationBadge = unreadChatroomCount > 0 && isNotificationToggleOn;
+
+  const notificationBadgeLabel = unreadChatroomCount > 9 ? "9+" : String(unreadChatroomCount);
+
   function renderAvatar(user, className = "small-avatar", options = {}) {
 
     const displayName = getDisplayName(user);
@@ -1783,15 +1791,43 @@ export default function ChatPage() {
 
           <div className="profile-actions">
             <button
-              className="ghost-button notification-button"
+              className={`ghost-button notification-button ${isNotificationToggleOn ? "on" : "off"}`}
               type="button"
               onClick={handleRequestNotifications}
+              aria-label={getNotificationButtonLabel()}
+              title={getNotificationButtonLabel()}
               disabled={
                 notificationPermission === "unsupported" ||
                 notificationPermission === "denied"
               }
             >
-              {getNotificationButtonLabel()}
+              <span className="notification-toggle-thumb">
+                <span className="notification-bell" aria-hidden="true">
+                  <svg viewBox="0 0 64 72" focusable="false">
+                    <path
+                      className="notification-bell-body"
+                      d="M33.5 8c4 0 7.2 3.1 7.5 7 8.2 3.5 13 11.4 13 22v9.5c0 4 1.7 7.4 5.1 10.2 1.4 1.2 1.9 3.1 1.2 4.8A4.3 4.3 0 0 1 56.2 64H7.8a4.3 4.3 0 0 1-4.1-2.5c-.7-1.7-.2-3.6 1.2-4.8C8.3 53.9 10 50.5 10 46.5V37c0-10.6 4.8-18.5 13-22 .3-3.9 3.5-7 7.5-7h3Z"
+                    />
+                    <path
+                      className="notification-bell-clapper"
+                      d="M23 68h18a9 9 0 0 1-18 0Z"
+                    />
+                    {
+                      !isNotificationToggleOn && (
+                        <path className="notification-muted-line" d="M12 12l40 40" />
+                      )
+                    }
+                  </svg>
+                </span>
+
+                {
+                  shouldShowNotificationBadge && (
+                    <span className="notification-badge">
+                      {notificationBadgeLabel}
+                    </span>
+                  )
+                }
+              </span>
             </button>
 
             <button

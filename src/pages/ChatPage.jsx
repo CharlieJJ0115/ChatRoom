@@ -329,7 +329,8 @@ export default function ChatPage() {
       if (room.lastMessageSenderId === currentUser.uid) return;
       if (
         room.id === selectedRoomIdRef.current &&
-        document.visibilityState === "visible"
+        document.visibilityState === "visible" &&
+        document.hasFocus()
       ) return;
 
       showIncomingMessageNotification(room);

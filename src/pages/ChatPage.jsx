@@ -355,6 +355,28 @@ export default function ChatPage() {
 
   useEffect(() => {
 
+    if (!openEmojiMessageId && !openMoreMessageId) return;
+
+    function handleMessageActionOutsidePointerDown(event) {
+
+      if (event.target.closest(".message-action-shell")) return;
+
+      setOpenEmojiMessageId(null);
+
+      setOpenMoreMessageId(null);
+
+    }
+
+    document.addEventListener("pointerdown", handleMessageActionOutsidePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleMessageActionOutsidePointerDown);
+    };
+
+  }, [openEmojiMessageId, openMoreMessageId]);
+
+  useEffect(() => {
+
     if (!currentUser) return;
 
     const nextActivity = {};

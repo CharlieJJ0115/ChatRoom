@@ -1711,23 +1711,40 @@ export default function ChatPage() {
       <aside className="chat-sidebar">
 
         <section className="profile-panel">
-          {renderAvatar(currentDisplayProfile, "avatar")}
+          <button
+            className="profile-summary-button"
+            type="button"
+            onClick={handleOpenProfile}
+            aria-label="Edit your profile"
+          >
+            {renderAvatar(currentDisplayProfile, "avatar")}
 
-          <div className="profile-text">
-            <p className="profile-label">Signed in as</p>
-            <h1>{getDisplayName(currentDisplayProfile)}</h1>
-            <small>{currentDisplayProfile.email}</small>
-          </div>
+            <span className="profile-text">
+              <span className="profile-label">Signed in as</span>
+              <strong>{getDisplayName(currentDisplayProfile)}</strong>
+              <small>{currentDisplayProfile.email}</small>
+            </span>
+          </button>
+
+          <button
+            className="logout-icon-button"
+            type="button"
+            onClick={handleLogout}
+            aria-label="Logout"
+            title="Logout"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              focusable="false"
+            >
+              <path d="M10 6H6.5A1.5 1.5 0 0 0 5 7.5v9A1.5 1.5 0 0 0 6.5 18H10" />
+              <path d="M14 8l4 4-4 4" />
+              <path d="M18 12H9" />
+            </svg>
+          </button>
 
           <div className="profile-actions">
-            <button className="ghost-button" type="button" onClick={handleOpenProfile}>
-              Edit Profile
-            </button>
-
-            <button className="ghost-button" type="button" onClick={handleLogout}>
-              Logout
-            </button>
-
             <button
               className="ghost-button notification-button"
               type="button"

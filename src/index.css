@@ -355,7 +355,7 @@ h3 {
 
 .profile-panel {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 44px;
   gap: 12px;
   align-items: center;
   padding: 16px;
@@ -402,7 +402,60 @@ h3 {
   outline-offset: 2px;
 }
 
+.profile-summary-button {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+  border: 0;
+  border-radius: 8px;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-summary-button:hover,
+.profile-summary-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.logout-icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--surface);
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.logout-icon-button:hover,
+.logout-icon-button:focus-visible {
+  color: #ffffff;
+  background: var(--accent);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.logout-icon-button svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
 .profile-text {
+  display: block;
   min-width: 0;
 }
 
@@ -415,11 +468,13 @@ h3 {
   text-transform: uppercase;
 }
 
-.profile-text h1 {
+.profile-text strong {
+  display: block;
   overflow: hidden;
   color: var(--text);
   font-size: 15px;
   font-weight: 700;
+  line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -436,7 +491,7 @@ h3 {
 .profile-actions {
   display: grid;
   grid-column: 1 / -1;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 8px;
 }
 
@@ -2017,6 +2072,21 @@ h3 {
     padding: 10px;
   }
 
+  .profile-panel {
+    grid-template-columns: minmax(0, 1fr) 40px;
+    gap: 10px;
+  }
+
+  .profile-summary-button {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .logout-icon-button {
+    width: 40px;
+    height: 40px;
+  }
+
   .room-list-panel {
     max-height: none;
     min-height: 0;
@@ -2170,11 +2240,26 @@ h3 {
   }
 
   .profile-panel {
+    grid-template-columns: minmax(0, 1fr) 36px;
+    gap: 8px;
+  }
+
+  .profile-summary-button {
     grid-template-columns: 38px minmax(0, 1fr);
     gap: 8px;
   }
 
-  .profile-text h1 {
+  .logout-icon-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .logout-icon-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .profile-text strong {
     font-size: 13px;
   }
 

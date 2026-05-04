@@ -151,6 +151,8 @@ export default function ChatPage() {
     getStoredNotificationMuted
   );
 
+  const [optimisticReadByRoom, setOptimisticReadByRoom] = useState({});
+
   const messageRefs = useRef({});
 
   const chatHeaderRef = useRef();
@@ -241,6 +243,7 @@ export default function ChatPage() {
 
     roomNotificationActivityRef.current = {};
     hasSeededNotificationActivityRef.current = false;
+    setOptimisticReadByRoom({});
 
   }, [currentUser?.uid]);
 
@@ -802,8 +805,10 @@ export default function ChatPage() {
     if (!lastMessageTime) return false;
 
     const readTime = getTimestampMillis(room.readBy?.[currentUser.uid]);
+    const optimisticReadTime = optimisticReadByRoom[room.id] || 0;
+    const effectiveReadTime = Math.max(readTime, optimisticReadTime);
 
-    return !readTime || lastMessageTime > readTime;
+    return !effectiveReadTime || lastMessageTime > effectiveReadTime;
 
   }
 
@@ -1366,9 +1371,25 @@ export default function ChatPage() {
     });
   }
 
+  function markRoomReadOptimistically(room) {
+
+    if (!room?.id) return;
+
+    const latestRoomTime = getTimestampMillis(room.lastMessageAt || room.updatedAt);
+    const optimisticReadTime = Math.max(Date.now(), latestRoomTime);
+
+    setOptimisticReadByRoom((currentReads) => ({
+      ...currentReads,
+      [room.id]: optimisticReadTime
+    }));
+
+  }
+
   async function handleSelectRoom(room) {
 
     const isSameRoom = room.id === selectedRoomId;
+
+    markRoomReadOptimistically(room);
 
     if (isSameRoom) {
       setInviteUserIds([]);

@@ -1812,6 +1812,25 @@ export default function ChatPage() {
 
           <div className="profile-actions">
             <button
+              className="create-room-trigger"
+              type="button"
+              onClick={handleOpenCreateRoomModal}
+              aria-label="Create Chatroom"
+              title="Create Chatroom"
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                focusable="false"
+              >
+                <path d="M5 6.5A3.5 3.5 0 0 1 8.5 3h5A3.5 3.5 0 0 1 17 6.5v3A3.5 3.5 0 0 1 13.5 13H10l-4 4v-4.4A3.5 3.5 0 0 1 3 9.2V6.5Z" />
+                <path d="M18 14v6" />
+                <path d="M15 17h6" />
+              </svg>
+              <span>New Chat</span>
+            </button>
+
+            <button
               className={`ghost-button notification-button ${isNotificationToggleOn ? "on" : "off"}`}
               type="button"
               onClick={handleRequestNotifications}
@@ -1849,14 +1868,6 @@ export default function ChatPage() {
                   )
                 }
               </span>
-            </button>
-
-            <button
-              className="create-room-trigger"
-              type="button"
-              onClick={handleOpenCreateRoomModal}
-            >
-              Create Chatroom
             </button>
           </div>
         </section>

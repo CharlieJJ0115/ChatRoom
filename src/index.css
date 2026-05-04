@@ -1702,6 +1702,10 @@ h3 {
   width: min(560px, 100%);
 }
 
+.blocked-users-modal {
+  width: min(600px, 100%);
+}
+
 .modal-header {
   display: flex;
   align-items: center;
@@ -1874,6 +1878,80 @@ h3 {
 .profile-block-actions .secondary-button,
 .profile-block-actions .danger-button {
   margin-top: 0;
+}
+
+.blocked-users-error {
+  margin: 16px 20px 0;
+}
+
+.blocked-users-list {
+  display: grid;
+  gap: 10px;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.blocked-user-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-muted);
+}
+
+.blocked-user-main {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.blocked-user-main strong,
+.blocked-user-main small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.blocked-user-main strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.blocked-user-main small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.blocked-user-status-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.blocked-user-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 0 9px;
+  color: #991b1b;
+  background: #fee2e2;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.blocked-user-status.blocked-you {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.blocked-user-action {
+  min-width: 84px;
+  min-height: 36px;
 }
 
 .reaction-modal {
@@ -2478,8 +2556,26 @@ h3 {
   .members-modal-body,
   .create-room-modal-body,
   .readonly-profile-details,
+  .blocked-users-list,
   .reaction-user-list {
     padding: 14px;
+  }
+
+  .blocked-user-row {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .blocked-user-status-list,
+  .blocked-user-action {
+    grid-column: 1 / -1;
+  }
+
+  .blocked-user-status-list {
+    justify-content: flex-start;
+  }
+
+  .blocked-user-action {
+    width: 100%;
   }
 
   .reaction-modal-tabs {

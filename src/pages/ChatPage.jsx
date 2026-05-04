@@ -135,6 +135,10 @@ export default function ChatPage() {
 
   const [isUpdatingBlock, setIsUpdatingBlock] = useState(false);
 
+  const [isBlockedUsersModalOpen, setIsBlockedUsersModalOpen] = useState(false);
+
+  const [blockedUsersActionError, setBlockedUsersActionError] = useState("");
+
   const [viewingImageMessage, setViewingImageMessage] = useState(null);
 
   const [viewingReactions, setViewingReactions] = useState(null);
@@ -948,6 +952,46 @@ export default function ChatPage() {
     setViewingProfileUser(null);
 
     setProfileActionError("");
+
+  }
+
+  function handleOpenBlockedUsersModal() {
+
+    setBlockedUsersActionError("");
+
+    setIsBlockedUsersModalOpen(true);
+
+  }
+
+  function handleCloseBlockedUsersModal() {
+
+    if (isUpdatingBlock) return;
+
+    setIsBlockedUsersModalOpen(false);
+
+    setBlockedUsersActionError("");
+
+  }
+
+  async function handleToggleBlockedUser(user) {
+
+    if (!user || user.uid === currentUser.uid) return;
+
+    try {
+      setIsUpdatingBlock(true);
+      setBlockedUsersActionError("");
+
+      if (isBlockedByMe(user.uid)) {
+        await unblockUser(currentUser.uid, user.uid);
+        return;
+      }
+
+      await blockUser(currentUser.uid, user.uid);
+    } catch (err) {
+      setBlockedUsersActionError(err.message);
+    } finally {
+      setIsUpdatingBlock(false);
+    }
 
   }
 
@@ -2723,6 +2767,14 @@ export default function ChatPage() {
                 </label>
 
                 <div className="modal-actions">
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={handleOpenBlockedUsersModal}
+                  >
+                    Manage Blocked Users
+                  </button>
+
                   <button className="secondary-button" type="button" onClick={handleCloseProfile}>
                     Cancel
                   </button>
@@ -2732,6 +2784,80 @@ export default function ChatPage() {
                   </button>
                 </div>
               </form>
+            </section>
+          </div>
+        )
+      }
+
+      {
+        isBlockedUsersModalOpen && (
+          <div className="modal-backdrop" role="presentation" onMouseDown={handleCloseBlockedUsersModal}>
+            <section
+              className="profile-modal blocked-users-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="blocked-users-modal-title"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <div>
+                  <p className="eyebrow">Privacy</p>
+                  <h2 id="blocked-users-modal-title">Blocked Users</h2>
+                </div>
+
+                <button className="modal-close" type="button" onClick={handleCloseBlockedUsersModal}>
+                  Close
+                </button>
+              </div>
+
+              {blockedUsersActionError && <p className="form-error blocked-users-error">{blockedUsersActionError}</p>}
+
+              <div className="blocked-users-list">
+                {
+                  selectableUsers.length === 0 ? (
+                    <p className="empty-copy">No other registered users found.</p>
+                  ) : (
+                    selectableUsers.map((user) => {
+                      const blockedByMe = isBlockedByMe(user.uid);
+                      const blockedMe = hasBlockedMe(user.uid);
+
+                      return (
+                        <div className="blocked-user-row" key={user.uid}>
+                          {renderAvatar(user)}
+
+                          <span className="blocked-user-main">
+                            <strong>{getDisplayName(user)}</strong>
+                            <small>{user.email || "Not provided"}</small>
+                          </span>
+
+                          <span className="blocked-user-status-list">
+                            {
+                              blockedByMe && (
+                                <span className="blocked-user-status">Blocked</span>
+                              )
+                            }
+
+                            {
+                              blockedMe && (
+                                <span className="blocked-user-status blocked-you">Blocked you</span>
+                              )
+                            }
+                          </span>
+
+                          <button
+                            className={`blocked-user-action ${blockedByMe ? "secondary-button" : "danger-button"}`}
+                            type="button"
+                            onClick={() => handleToggleBlockedUser(user)}
+                            disabled={isUpdatingBlock}
+                          >
+                            {isUpdatingBlock ? "Updating..." : blockedByMe ? "Unblock" : "Block"}
+                          </button>
+                        </div>
+                      );
+                    })
+                  )
+                }
+              </div>
             </section>
           </div>
         )

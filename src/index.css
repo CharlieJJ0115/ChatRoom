@@ -1147,6 +1147,26 @@ h3 {
   line-height: 1;
 }
 
+.message-icon-button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.message-icon-button .reaction-action-icon {
+  transform: translateY(-1px);
+}
+
+.message-icon-button .filled-icon-dot {
+  fill: currentColor;
+  stroke: none;
+}
+
 .message-icon-button:hover,
 .edit-message-actions button:hover {
   background: rgba(148, 163, 184, 0.14);

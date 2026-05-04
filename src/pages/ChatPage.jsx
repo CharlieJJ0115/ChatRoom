@@ -45,6 +45,36 @@ const availableReactionEmojis = ["👍", "❤️", "😂", "😮", "😢"];
 
 const notificationMutedStorageKey = "midterm-chatroom-notifications-muted";
 
+function MoreIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle className="filled-icon-dot" cx="12" cy="5" r="1.6" />
+      <circle className="filled-icon-dot" cx="12" cy="12" r="1.6" />
+      <circle className="filled-icon-dot" cx="12" cy="19" r="1.6" />
+    </svg>
+  );
+}
+
+function ReplyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M10 7L5 12l5 5" />
+      <path d="M5 12h8a6 6 0 0 1 6 6v1" />
+    </svg>
+  );
+}
+
+function ReactionIcon() {
+  return (
+    <svg className="reaction-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="8" />
+      <path d="M8.5 10h.01" />
+      <path d="M15.5 10h.01" />
+      <path d="M8.5 14.5a5 5 0 0 0 7 0" />
+    </svg>
+  );
+}
+
 function getBrowserNotificationPermission() {
 
   if (typeof window === "undefined" || !("Notification" in window)) {
@@ -2085,7 +2115,7 @@ export default function ChatPage() {
                                           onClick={() => handleToggleMoreActions(message.id)}
                                           aria-label="More message actions"
                                         >
-                                          ⋮
+                                          <MoreIcon />
                                         </button>
                                       )
                                     }
@@ -2096,7 +2126,7 @@ export default function ChatPage() {
                                       onClick={() => handleStartReply(message)}
                                       aria-label="Reply to message"
                                     >
-                                      ↩
+                                      <ReplyIcon />
                                     </button>
 
                                     <button
@@ -2105,7 +2135,7 @@ export default function ChatPage() {
                                       onClick={() => handleToggleEmojiPicker(message.id)}
                                       aria-label="React to message"
                                     >
-                                      ☺
+                                      <ReactionIcon />
                                     </button>
                                   </div>
 
@@ -2227,7 +2257,7 @@ export default function ChatPage() {
                                       onClick={() => handleStartReply(message)}
                                       aria-label="Reply to message"
                                     >
-                                      ↩
+                                      <ReplyIcon />
                                     </button>
 
                                     <button
@@ -2236,7 +2266,7 @@ export default function ChatPage() {
                                       onClick={() => handleToggleEmojiPicker(message.id)}
                                       aria-label="React to message"
                                     >
-                                      ☺
+                                      <ReactionIcon />
                                     </button>
                                   </div>
 

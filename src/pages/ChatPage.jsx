@@ -2827,12 +2827,12 @@ export default function ChatPage() {
                     </div>
 
                     <div className="modal-actions">
-                      <button className="secondary-button" type="button" onClick={handleCloseRoomSettings}>
-                        Cancel
-                      </button>
-
                       <button className="primary-button" type="submit" disabled={isSavingRoomSettings}>
                         {isSavingRoomSettings ? "Saving..." : "Save Changes"}
+                      </button>
+
+                      <button className="secondary-button" type="button" onClick={handleCloseRoomSettings}>
+                        Cancel
                       </button>
                     </div>
                   </form>
@@ -2960,13 +2960,15 @@ export default function ChatPage() {
                     Manage Blocked Users
                   </button>
 
-                  <button className="secondary-button" type="button" onClick={handleCloseProfile}>
-                    Cancel
-                  </button>
+                  <div className="profile-save-actions">
+                    <button className="primary-button" type="submit" disabled={isSavingProfile}>
+                      {isSavingProfile ? "Saving..." : "Save Profile"}
+                    </button>
 
-                  <button className="primary-button" type="submit" disabled={isSavingProfile}>
-                    {isSavingProfile ? "Saving..." : "Save Profile"}
-                  </button>
+                    <button className="secondary-button" type="button" onClick={handleCloseProfile}>
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </form>
             </section>

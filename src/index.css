@@ -1999,6 +1999,19 @@ h3 {
   margin-top: 0;
 }
 
+.profile-save-actions {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.profile-save-actions .primary-button,
+.profile-save-actions .secondary-button {
+  min-height: 44px;
+  margin-top: 0;
+}
+
 .members-modal-body {
   display: flex;
   min-height: 0;
@@ -2773,6 +2786,10 @@ h3 {
   }
 
   .modal-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-save-actions {
     grid-template-columns: 1fr;
   }
 

@@ -1950,6 +1950,12 @@ h3 {
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
 }
 
+.edit-profile-modal .profile-preview {
+  margin: 20px 20px 0;
+  padding: 16px;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+}
+
 .blocked-users-modal {
   width: min(600px, 100%);
 }
@@ -2080,6 +2086,11 @@ h3 {
   font-size: 13px;
 }
 
+.edit-profile-modal .profile-upload-row .room-upload-button {
+  min-height: 40px;
+  padding: 0 14px;
+}
+
 .room-settings-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2186,6 +2197,64 @@ h3 {
 .profile-save-actions .secondary-button {
   min-height: 44px;
   margin-top: 0;
+}
+
+.profile-manage-blocked-button {
+  grid-column: 1 / -1;
+  color: var(--accent);
+  background: #eff6ff;
+}
+
+.profile-manage-blocked-button:hover:not(:disabled) {
+  color: var(--accent);
+  background: #dbeafe;
+}
+
+.profile-save-actions .profile-save-button,
+.profile-save-actions .profile-cancel-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.profile-save-actions .profile-save-button {
+  border: 1px solid #4f8df8;
+  color: #ffffff;
+  background: linear-gradient(180deg, #2f7cff 0%, #125bed 100%);
+  box-shadow: 0 8px 18px rgba(18, 91, 237, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+}
+
+.profile-save-actions .profile-save-button:hover:not(:disabled) {
+  background: linear-gradient(180deg, #256ff5 0%, #0f50dc 100%);
+}
+
+.profile-save-actions .profile-save-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  box-shadow: none;
+}
+
+.profile-save-actions .profile-cancel-button {
+  border: 1px solid #cbd5e1;
+  color: var(--text);
+  background: #ffffff;
+}
+
+.profile-save-actions .profile-cancel-button:hover:not(:disabled) {
+  border-color: #94a3b8;
+  color: var(--text);
+  background: #f8fafc;
+}
+
+.profile-save-actions svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
 }
 
 .members-modal-body {

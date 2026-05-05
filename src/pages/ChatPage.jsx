@@ -1087,6 +1087,28 @@ export default function ChatPage() {
 
   }
 
+  async function handleTogglePrivateRoomBlock() {
+
+    if (!selectedRoomPartner || selectedRoomPartner.uid === currentUser.uid) return;
+
+    try {
+      setIsUpdatingBlock(true);
+      setRoomSettingsError("");
+
+      if (isBlockedByMe(selectedRoomPartner.uid)) {
+        await unblockUser(currentUser.uid, selectedRoomPartner.uid);
+        return;
+      }
+
+      await blockUser(currentUser.uid, selectedRoomPartner.uid);
+    } catch (err) {
+      setRoomSettingsError(err.message);
+    } finally {
+      setIsUpdatingBlock(false);
+    }
+
+  }
+
   async function handleBlockViewingUser() {
 
     if (!viewingProfileUser || viewingProfileUser.uid === currentUser.uid) return;
@@ -2715,13 +2737,39 @@ export default function ChatPage() {
               {
                 isSelectedRoomPrivate ? (
                   <div className="private-room-settings">
-                  <button className="secondary-button" type="button" onClick={handleOpenSearchFromSettings}>
-                    Search Messages
-                  </button>
+                    <button className="secondary-button" type="button" onClick={handleOpenSearchFromSettings}>
+                      Search Messages
+                    </button>
 
-                  <button className="secondary-button" type="button" onClick={handleCloseRoomSettings}>
-                    Close
-                  </button>
+                    {
+                      selectedRoomPartner && (
+                        isBlockedByMe(selectedRoomPartner.uid) ? (
+                          <button
+                            className="secondary-button"
+                            type="button"
+                            onClick={handleTogglePrivateRoomBlock}
+                            disabled={isUpdatingBlock}
+                          >
+                            {isUpdatingBlock ? "Updating..." : "Unblock User"}
+                          </button>
+                        ) : hasBlockedMe(selectedRoomPartner.uid) ? (
+                          <p className="empty-copy private-room-block-note">This user blocked you.</p>
+                        ) : (
+                          <button
+                            className="danger-button"
+                            type="button"
+                            onClick={handleTogglePrivateRoomBlock}
+                            disabled={isUpdatingBlock}
+                          >
+                            {isUpdatingBlock ? "Updating..." : "Block User"}
+                          </button>
+                        )
+                      )
+                    }
+
+                    <button className="secondary-button" type="button" onClick={handleCloseRoomSettings}>
+                      Close
+                    </button>
                   </div>
                 ) : (
                   <form className="profile-form" onSubmit={handleSaveRoomSettings}>

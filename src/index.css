@@ -3321,33 +3321,51 @@ h3 {
 }
 
 .google-submit {
-  min-height: 42px;
-  border-color: #dbe3ef;
-  border-radius: 8px;
-  color: var(--text);
+  min-height: 40px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  color: #3c4043;
   background: #ffffff;
-  font-size: 16px;
-  font-weight: 800;
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  box-shadow: none;
+  font-family: "Roboto", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .google-submit:hover:not(:disabled) {
-  border-color: #bfccdc;
-  background: #f8fafc;
-  transform: translateY(-1px);
+  border-color: #d2e3fc;
+  background: #f8fafd;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.18);
+  transform: none;
 }
 
-.google-submit span {
+.google-submit:focus-visible {
+  outline: 2px solid rgba(26, 115, 232, 0.35);
+  outline-offset: 2px;
+}
+
+.google-submit:disabled {
+  color: rgba(60, 64, 67, 0.48);
+  background: #ffffff;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.google-submit .google-icon {
   display: inline-flex;
-  width: auto;
-  height: auto;
+  width: 18px;
+  height: 18px;
   align-items: center;
   justify-content: center;
+  border: 0;
   border-radius: 0;
-  color: #4285f4;
   background: transparent;
-  font-size: 20px;
-  font-weight: 900;
+}
+
+.google-submit .google-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .auth-switch {

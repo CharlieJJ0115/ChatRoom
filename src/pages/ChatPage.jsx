@@ -2360,8 +2360,14 @@ export default function ChatPage() {
                   type="button"
                   onClick={() => imageInputRef.current?.click()}
                   disabled={isSendingImage || isPrivateChatBlocked}
+                  aria-label={isSendingImage ? "Uploading image" : "Upload image"}
                 >
-                  {isSendingImage ? "Uploading..." : "Image"}
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <rect x="4" y="5" width="16" height="14" rx="2.5" />
+                    <circle cx="9" cy="10" r="1.5" />
+                    <path d="M7 17l4.2-4.2 2.8 2.8 1.5-1.5L19 17" />
+                  </svg>
+                  <span>Image</span>
                 </button>
 
                 <input

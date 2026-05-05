@@ -1487,14 +1487,44 @@ h3 {
 }
 
 .message-form .image-upload-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: 0 0 auto;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
   color: var(--accent);
-  background: var(--accent-soft);
+  background: #ffffff;
+  line-height: 1;
+}
+
+.message-form .image-upload-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .message-form .image-upload-button:hover:not(:disabled) {
-  color: #ffffff;
-  background: var(--accent);
+  border-color: #93c5fd;
+  color: var(--accent);
+  background: #eff6ff;
+}
+
+.message-form .image-upload-button:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+.message-form .image-upload-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .message-form button:hover,
@@ -2427,6 +2457,11 @@ h3 {
   .message-form button {
     min-height: 40px;
     padding: 0 10px;
+  }
+
+  .message-form .image-upload-button {
+    width: auto;
+    padding: 8px 10px;
   }
 
   .message-content-stack {

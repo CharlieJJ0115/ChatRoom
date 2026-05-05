@@ -2380,8 +2380,16 @@ export default function ChatPage() {
                   disabled={isSendingImage || isPrivateChatBlocked}
                 />
 
-                <button type="submit" disabled={isSendingImage || isPrivateChatBlocked}>
-                  Send
+                <button
+                  className="send-message-button"
+                  type="submit"
+                  disabled={isSendingImage || isPrivateChatBlocked}
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M21 3L10 14" />
+                    <path d="M21 3l-7 18-4-7-7-4 18-7Z" />
+                  </svg>
+                  <span>Send</span>
                 </button>
               </form>
 

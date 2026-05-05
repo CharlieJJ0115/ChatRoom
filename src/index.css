@@ -1532,6 +1532,46 @@ h3 {
   background: var(--accent-strong);
 }
 
+.message-form .send-message-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #4f83f1;
+  line-height: 1;
+  box-shadow: 0 8px 18px rgba(79, 131, 241, 0.24);
+}
+
+.message-form .send-message-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.message-form .send-message-button:hover:not(:disabled) {
+  background: #3f73e6;
+  box-shadow: 0 10px 22px rgba(63, 115, 230, 0.28);
+}
+
+.message-form .send-message-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(79, 131, 241, 0.22);
+}
+
+.message-form .send-message-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+}
+
 .primary-button {
   width: 100%;
   min-height: 44px;
@@ -2462,6 +2502,11 @@ h3 {
   .message-form .image-upload-button {
     width: auto;
     padding: 8px 10px;
+  }
+
+  .message-form .send-message-button {
+    width: auto;
+    padding: 8px 12px;
   }
 
   .message-content-stack {

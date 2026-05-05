@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import useAuth from "../hooks/useAuth";
 
@@ -484,6 +484,46 @@ export default function ChatPage() {
     }
 
     return 0;
+
+  }
+
+  function formatMessageTime(timestamp) {
+
+    if (!timestamp) return "";
+
+    const date = typeof timestamp.toDate === "function"
+      ? timestamp.toDate()
+      : timestamp instanceof Date
+        ? timestamp
+        : null;
+
+    if (!date) return "";
+
+    return new Intl.DateTimeFormat("zh-TW", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    }).format(date).replace(/\s/g, "");
+
+  }
+
+  function getMessageDateKey(timestamp) {
+
+    if (!timestamp) return "";
+
+    const date = typeof timestamp.toDate === "function"
+      ? timestamp.toDate()
+      : timestamp instanceof Date
+        ? timestamp
+        : null;
+
+    if (!date) return "";
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}/${month}/${day}`;
 
   }
 
@@ -2065,22 +2105,37 @@ export default function ChatPage() {
                 }
 
                 {
-                  visibleMessages.map((message) => {
+                  visibleMessages.map((message, index) => {
+                    const messageDateKey = getMessageDateKey(message.createdAt);
+                    const previousMessageDateKey = getMessageDateKey(visibleMessages[index - 1]?.createdAt);
+                    const shouldShowDateSeparator = Boolean(
+                      messageDateKey && messageDateKey !== previousMessageDateKey
+                    );
+
                     if (isBlockedMessage(message)) {
                       return (
-                        <article
-                          className="blocked-message-row"
-                          key={message.id}
-                          ref={(element) => {
-                            if (element) {
-                              messageRefs.current[message.id] = element;
-                            }
-                          }}
-                        >
-                          <div className="blocked-message-placeholder">
-                            Message from a blocked user
-                          </div>
-                        </article>
+                        <Fragment key={message.id}>
+                          {
+                            shouldShowDateSeparator && (
+                              <div className="message-date-separator" key={`date-${message.id}`}>
+                                {messageDateKey}
+                              </div>
+                            )
+                          }
+
+                          <article
+                            className="blocked-message-row"
+                            ref={(element) => {
+                              if (element) {
+                                messageRefs.current[message.id] = element;
+                              }
+                            }}
+                          >
+                            <div className="blocked-message-placeholder">
+                              Message from a blocked user
+                            </div>
+                          </article>
+                        </Fragment>
                       );
                     }
 
@@ -2093,22 +2148,31 @@ export default function ChatPage() {
                     const canUnsendMessage = isOwnMessage && !message.isUnsent;
                     const currentUserReaction = message.reactions?.[currentUser.uid] || "";
                     const reactionCounts = getReactionCounts(message);
+                    const messageTime = formatMessageTime(message.createdAt);
 
                     return (
-                      <article
-                        className={`message-row ${isOwnMessage ? "own" : ""} ${message.type === "image" && !message.isUnsent ? "image-message-row" : ""} ${highlightedMessageId === message.id ? "highlighted" : ""}`}
-                        key={message.id}
-                        ref={(element) => {
-                          if (element) {
-                            messageRefs.current[message.id] = element;
-                          }
-                        }}
-                      >
+                      <Fragment key={message.id}>
+                        {
+                          shouldShowDateSeparator && (
+                            <div className="message-date-separator" key={`date-${message.id}`}>
+                              {messageDateKey}
+                            </div>
+                          )
+                        }
+
+                        <article
+                          className={`message-row ${isOwnMessage ? "own" : ""} ${message.type === "image" && !message.isUnsent ? "image-message-row" : ""} ${highlightedMessageId === message.id ? "highlighted" : ""}`}
+                          ref={(element) => {
+                            if (element) {
+                              messageRefs.current[message.id] = element;
+                            }
+                          }}
+                        >
                         {renderAvatar(sender, "small-avatar", {
                           onClick: isOwnMessage ? null : () => handleOpenReadonlyProfile(sender)
                         })}
 
-                        <div className="message-content-stack">
+                        <div className={`message-content-stack ${reactionCounts.length > 0 ? "has-reactions" : ""}`}>
                           {
                             !message.isUnsent && message.replyTo && (
                               <div className="reply-context">
@@ -2163,6 +2227,8 @@ export default function ChatPage() {
                                     </button>
                                   </div>
 
+                                  {messageTime && <span className="message-time">{messageTime}</span>}
+
                                   {
                                     openEmojiMessageId === message.id && (
                                       <div className="message-action-popover emoji-popover">
@@ -2204,7 +2270,7 @@ export default function ChatPage() {
                               )
                             }
 
-                            <div className="message-bubble-stack">
+                            <div className={`message-bubble-stack ${reactionCounts.length > 0 ? "has-reactions" : ""}`}>
                               <div className={`message-bubble ${message.type === "image" && !message.isUnsent ? "image-message-bubble" : ""}`}>
                                 <span className="message-sender">
                                   {getDisplayName(sender)}
@@ -2294,6 +2360,8 @@ export default function ChatPage() {
                                     </button>
                                   </div>
 
+                                  {messageTime && <span className="message-time">{messageTime}</span>}
+
                                   {
                                     openEmojiMessageId === message.id && (
                                       <div className="message-action-popover emoji-popover">
@@ -2319,7 +2387,8 @@ export default function ChatPage() {
                           </div>
 
                         </div>
-                      </article>
+                        </article>
+                      </Fragment>
                     );
                   })
                 }

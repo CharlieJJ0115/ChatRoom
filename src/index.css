@@ -874,6 +874,19 @@ h3 {
   background: linear-gradient(180deg, #ffffff 0%, var(--panel-muted) 100%);
 }
 
+.message-date-separator {
+  align-self: center;
+  margin: 2px 0;
+  padding: 4px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.86);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
 .message-search {
   padding: 12px 14px;
   border-bottom: 1px solid var(--border);
@@ -933,6 +946,10 @@ h3 {
   order: 2;
 }
 
+.message-content-stack.has-reactions {
+  padding-bottom: 34px;
+}
+
 .message-row.own .message-content-stack {
   align-items: flex-end;
 }
@@ -949,7 +966,9 @@ h3 {
 }
 
 .message-bubble-stack {
+  position: relative;
   display: flex;
+  width: fit-content;
   max-width: 100%;
   min-width: 0;
   flex-direction: column;
@@ -1136,9 +1155,15 @@ h3 {
   position: relative;
   display: flex;
   flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-start;
   align-self: center;
   justify-content: flex-end;
   margin-bottom: 0;
+}
+
+.message-row.own .message-action-shell {
+  align-items: flex-end;
 }
 
 .message-row.own .small-avatar {
@@ -1150,6 +1175,15 @@ h3 {
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
+}
+
+.message-time {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .message-icon-button,
@@ -1244,8 +1278,13 @@ h3 {
 
 .reaction-summary {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 5px;
+}
+
+.reaction-summary span {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .reaction-button,
@@ -1272,17 +1311,23 @@ h3 {
 }
 
 .reaction-summary {
+  position: absolute;
+  top: calc(100% - 5px);
+  left: -4px;
+  z-index: 2;
   width: fit-content;
+  max-width: max-content;
   align-items: center;
   align-self: flex-end;
-  margin-top: -5px;
-  margin-right: -4px;
+  margin: 0;
   padding: 4px 8px;
   color: var(--text);
+  white-space: nowrap;
 }
 
 .message-row.own .reaction-summary {
-  margin-right: -4px;
+  right: -4px;
+  left: auto;
 }
 
 .reaction-summary:hover {

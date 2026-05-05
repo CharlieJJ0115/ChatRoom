@@ -3241,11 +3241,10 @@ h3 {
 }
 
 .auth-input-shell {
-  display: grid;
+  position: relative;
+  display: flex;
   min-height: 42px;
-  grid-template-columns: 22px minmax(0, 1fr);
   align-items: center;
-  gap: 10px;
   border: 1px solid #dbe3ef;
   border-radius: 8px;
   padding: 0 14px;
@@ -3259,8 +3258,16 @@ h3 {
 }
 
 .auth-input-icon {
+  position: absolute;
+  top: 50%;
+  left: 16px;
   display: inline-flex;
+  width: 18px;
+  flex-shrink: 0;
+  justify-content: center;
   color: #8a98aa;
+  pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .auth-input-icon svg {
@@ -3279,9 +3286,11 @@ h3 {
   border: 0;
   outline: none;
   box-shadow: none;
-  padding: 0;
+  padding: 0 0 0 34px;
+  caret-color: var(--accent);
   color: var(--text);
   background: transparent;
+  line-height: 1.2;
 }
 
 .auth-input-shell input::placeholder {

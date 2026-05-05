@@ -3179,6 +3179,59 @@ h3 {
   animation-delay: -7s;
 }
 
+.auth-cursor-glow {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--auth-mouse-opacity, 0);
+  background:
+    radial-gradient(
+      circle 84px at var(--auth-mouse-x, 50%) var(--auth-mouse-y, 50%),
+      rgba(255, 255, 255, 0.82) 0%,
+      rgba(191, 219, 254, 0.34) 42%,
+      rgba(147, 197, 253, 0.14) 62%,
+      transparent 78%
+    ),
+    radial-gradient(
+      circle 72px at var(--auth-trail-2-x, 50%) var(--auth-trail-2-y, 50%),
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(191, 219, 254, 0.2) 48%,
+      transparent 78%
+    ),
+    radial-gradient(
+      circle 62px at var(--auth-trail-3-x, 50%) var(--auth-trail-3-y, 50%),
+      rgba(255, 255, 255, 0.26) 0%,
+      rgba(147, 197, 253, 0.12) 54%,
+      transparent 80%
+    ),
+    radial-gradient(
+      circle 52px at var(--auth-trail-4-x, 50%) var(--auth-trail-4-y, 50%),
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(147, 197, 253, 0.08) 58%,
+      transparent 76%
+    ),
+    radial-gradient(
+      circle 44px at var(--auth-trail-5-x, 50%) var(--auth-trail-5-y, 50%),
+      rgba(255, 255, 255, 0.11) 0%,
+      rgba(147, 197, 253, 0.06) 62%,
+      transparent 78%
+    ),
+    radial-gradient(
+      circle 38px at var(--auth-trail-6-x, 50%) var(--auth-trail-6-y, 50%),
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(147, 197, 253, 0.045) 64%,
+      transparent 80%
+    ),
+    radial-gradient(
+      circle 32px at var(--auth-trail-7-x, 50%) var(--auth-trail-7-y, 50%),
+      rgba(255, 255, 255, 0.055) 0%,
+      rgba(147, 197, 253, 0.032) 66%,
+      transparent 82%
+    );
+  transition: opacity 0.22s ease;
+}
+
 .auth-card {
   position: relative;
   z-index: 1;

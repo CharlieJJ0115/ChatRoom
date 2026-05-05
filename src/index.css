@@ -1615,9 +1615,9 @@ h3 {
   padding: 8px 14px;
   border-radius: 8px;
   color: #ffffff;
-  background: #4f83f1;
+  background: var(--accent);
   line-height: 1;
-  box-shadow: 0 8px 18px rgba(79, 131, 241, 0.24);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.24);
 }
 
 .message-form .send-message-button svg {
@@ -1631,12 +1631,12 @@ h3 {
 }
 
 .message-form .send-message-button:hover:not(:disabled) {
-  background: #3f73e6;
-  box-shadow: 0 10px 22px rgba(63, 115, 230, 0.28);
+  background: var(--accent-strong);
+  box-shadow: 0 10px 22px rgba(29, 78, 216, 0.28);
 }
 
 .message-form .send-message-button:focus-visible {
-  box-shadow: 0 0 0 3px rgba(79, 131, 241, 0.22);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.22);
 }
 
 .message-form .send-message-button:disabled {

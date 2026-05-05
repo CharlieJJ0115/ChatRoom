@@ -50,22 +50,38 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit}>
         <label className="field-group">
           <span>Email</span>
-          <input
-            type="email"
-            placeholder="you@example.com"
-            ref={emailRef}
-            required
-          />
+          <div className="auth-input-shell">
+            <span className="auth-input-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 6h16v12H4z" />
+                <path d="m4 7 8 6 8-6" />
+              </svg>
+            </span>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              ref={emailRef}
+              required
+            />
+          </div>
         </label>
 
         <label className="field-group">
           <span>Password</span>
-          <input
-            type="password"
-            placeholder="Create a password"
-            ref={passwordRef}
-            required
-          />
+          <div className="auth-input-shell">
+            <span className="auth-input-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="5" y="10" width="14" height="10" rx="2" />
+                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+              </svg>
+            </span>
+            <input
+              type="password"
+              placeholder="Create a password"
+              ref={passwordRef}
+              required
+            />
+          </div>
         </label>
 
         <button className="auth-submit" type="submit">

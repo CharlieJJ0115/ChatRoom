@@ -22,21 +22,11 @@ function App() {
 
   return (
     <main className="auth-page">
-      <section className="auth-hero">
-        <div className="auth-brand">
-          <span className="brand-mark">C</span>
-          <span>Midterm Chatroom</span>
-        </div>
-
-        <div className="auth-copy">
-          <p className="eyebrow">Firebase Chat App</p>
-          <h1>Chat with your classmates in private rooms.</h1>
-          <p>
-            Create chatrooms, invite members, and keep the full message history
-            available for everyone in the room.
-          </p>
-        </div>
-      </section>
+      <span className="auth-background-orb auth-orb-large-top" aria-hidden="true" />
+      <span className="auth-background-orb auth-orb-large-bottom" aria-hidden="true" />
+      <span className="auth-background-dot auth-dot-left" aria-hidden="true" />
+      <span className="auth-background-dot auth-dot-right" aria-hidden="true" />
+      <span className="auth-background-dot auth-dot-bottom" aria-hidden="true" />
 
       <section className="auth-card">
         {isLogin ? <LoginPage /> : <RegisterPage />}

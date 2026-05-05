@@ -2737,37 +2737,51 @@ export default function ChatPage() {
               {
                 isSelectedRoomPrivate ? (
                   <div className="private-room-settings">
-                    <button className="secondary-button" type="button" onClick={handleOpenSearchFromSettings}>
-                      Search Messages
-                    </button>
+                    <div className="private-room-action-row">
+                      <button className="secondary-button private-room-search-button" type="button" onClick={handleOpenSearchFromSettings}>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <circle cx="11" cy="11" r="7" />
+                          <path d="M20 20l-3.5-3.5" />
+                        </svg>
+                        <span>Search Messages</span>
+                      </button>
 
-                    {
-                      selectedRoomPartner && (
-                        isBlockedByMe(selectedRoomPartner.uid) ? (
-                          <button
-                            className="secondary-button"
-                            type="button"
-                            onClick={handleTogglePrivateRoomBlock}
-                            disabled={isUpdatingBlock}
-                          >
-                            {isUpdatingBlock ? "Updating..." : "Unblock User"}
-                          </button>
-                        ) : hasBlockedMe(selectedRoomPartner.uid) ? (
-                          <p className="empty-copy private-room-block-note">This user blocked you.</p>
-                        ) : (
-                          <button
-                            className="danger-button"
-                            type="button"
-                            onClick={handleTogglePrivateRoomBlock}
-                            disabled={isUpdatingBlock}
-                          >
-                            {isUpdatingBlock ? "Updating..." : "Block User"}
-                          </button>
+                      {
+                        selectedRoomPartner && (
+                          isBlockedByMe(selectedRoomPartner.uid) ? (
+                            <button
+                              className="secondary-button private-room-block-button"
+                              type="button"
+                              onClick={handleTogglePrivateRoomBlock}
+                              disabled={isUpdatingBlock}
+                            >
+                              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M12 3l7 3v5c0 4.4-2.8 8.3-7 10-4.2-1.7-7-5.6-7-10V6l7-3Z" />
+                                <path d="M8.5 12h7" />
+                              </svg>
+                              <span>{isUpdatingBlock ? "Updating..." : "Unblock User"}</span>
+                            </button>
+                          ) : hasBlockedMe(selectedRoomPartner.uid) ? (
+                            <p className="empty-copy private-room-block-note">This user blocked you.</p>
+                          ) : (
+                            <button
+                              className="danger-button private-room-block-button"
+                              type="button"
+                              onClick={handleTogglePrivateRoomBlock}
+                              disabled={isUpdatingBlock}
+                            >
+                              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M12 3l7 3v5c0 4.4-2.8 8.3-7 10-4.2-1.7-7-5.6-7-10V6l7-3Z" />
+                                <path d="M8.5 12h7" />
+                              </svg>
+                              <span>{isUpdatingBlock ? "Updating..." : "Block User"}</span>
+                            </button>
+                          )
                         )
-                      )
-                    }
+                      }
+                    </div>
 
-                    <button className="secondary-button" type="button" onClick={handleCloseRoomSettings}>
+                    <button className="secondary-button private-room-close-button" type="button" onClick={handleCloseRoomSettings}>
                       Close
                     </button>
                   </div>

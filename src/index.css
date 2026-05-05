@@ -1972,6 +1972,34 @@ h3 {
   padding: 0 14px;
 }
 
+.profile-upload-row .room-upload-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid #bfdbfe;
+  color: var(--accent);
+  background: #ffffff;
+}
+
+.profile-upload-row .room-upload-button:hover:not(:disabled) {
+  border-color: #93c5fd;
+  color: var(--accent);
+  background: #eff6ff;
+}
+
+.room-upload-button svg,
+.room-action-button svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
 .profile-upload-row span {
   color: var(--muted);
   font-size: 13px;
@@ -1987,6 +2015,23 @@ h3 {
   margin-top: 0;
 }
 
+.room-settings-actions .room-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 50px;
+  border: 1px solid #bfdbfe;
+  color: var(--accent);
+  background: #eff6ff;
+}
+
+.room-settings-actions .room-action-button:hover:not(:disabled) {
+  border-color: #93c5fd;
+  color: var(--accent);
+  background: #dbeafe;
+}
+
 .modal-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1997,6 +2042,62 @@ h3 {
 .modal-actions .primary-button,
 .modal-actions .secondary-button {
   margin-top: 0;
+}
+
+.room-save-actions {
+  gap: 14px;
+}
+
+.room-save-actions .room-save-button,
+.room-save-actions .room-cancel-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 64px;
+  margin-top: 0;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.room-save-actions .room-save-button {
+  border: 1px solid #4f8df8;
+  color: #ffffff;
+  background: linear-gradient(180deg, #2f7cff 0%, #125bed 100%);
+  box-shadow: 0 10px 22px rgba(18, 91, 237, 0.24), inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+.room-save-actions .room-save-button:hover:not(:disabled) {
+  background: linear-gradient(180deg, #256ff5 0%, #0f50dc 100%);
+}
+
+.room-save-actions .room-save-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  box-shadow: none;
+}
+
+.room-save-actions .room-cancel-button {
+  border: 1px solid #cbd5e1;
+  color: var(--text);
+  background: #ffffff;
+}
+
+.room-save-actions .room-cancel-button:hover:not(:disabled) {
+  border-color: #94a3b8;
+  color: var(--text);
+  background: #f8fafc;
+}
+
+.room-save-actions svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
 }
 
 .profile-save-actions {
@@ -2786,6 +2887,10 @@ h3 {
   }
 
   .modal-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .room-save-actions {
     grid-template-columns: 1fr;
   }
 

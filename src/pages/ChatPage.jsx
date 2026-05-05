@@ -2806,32 +2806,49 @@ export default function ChatPage() {
 
                     <div className="profile-upload-row">
                       <button
-                        className="secondary-button"
+                        className="secondary-button room-upload-button"
                         type="button"
                         onClick={() => roomPictureInputRef.current?.click()}
                       >
-                        Upload Image
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <path d="M12 16V4" />
+                          <path d="M7 9l5-5 5 5" />
+                          <path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
+                        </svg>
+                        <span>Upload Image</span>
                       </button>
 
                       <span>Image file, max 750KB</span>
                     </div>
 
                     <div className="room-settings-actions">
-                      <button className="secondary-button" type="button" onClick={handleOpenSearchFromSettings}>
-                        Search Messages
+                      <button className="secondary-button room-action-button" type="button" onClick={handleOpenSearchFromSettings}>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <circle cx="11" cy="11" r="7" />
+                          <path d="M20 20l-3.5-3.5" />
+                        </svg>
+                        <span>Search Messages</span>
                       </button>
 
-                      <button className="secondary-button" type="button" onClick={handleOpenMembersFromSettings}>
-                        Manage Members
+                      <button className="secondary-button room-action-button" type="button" onClick={handleOpenMembersFromSettings}>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <circle cx="12" cy="8" r="3.5" />
+                          <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
+                        </svg>
+                        <span>Manage Members</span>
                       </button>
                     </div>
 
-                    <div className="modal-actions">
-                      <button className="primary-button" type="submit" disabled={isSavingRoomSettings}>
-                        {isSavingRoomSettings ? "Saving..." : "Save Changes"}
+                    <div className="modal-actions room-save-actions">
+                      <button className="primary-button room-save-button" type="submit" disabled={isSavingRoomSettings}>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <circle cx="12" cy="12" r="9" />
+                          <path d="M8 12.5l2.7 2.7L16.5 9" />
+                        </svg>
+                        <span>{isSavingRoomSettings ? "Saving..." : "Save Changes"}</span>
                       </button>
 
-                      <button className="secondary-button" type="button" onClick={handleCloseRoomSettings}>
+                      <button className="secondary-button room-cancel-button" type="button" onClick={handleCloseRoomSettings}>
                         Cancel
                       </button>
                     </div>

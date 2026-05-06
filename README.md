@@ -15,6 +15,8 @@ send realtime messages, manage profiles, and use several message operations.
 ### Chatrooms
 Click the "New Chat" button to open create chatroom modal.
 
+![User profile panel showing New Chat button](How_to_use_img/user_profile.png)
+
 - Create private chatrooms with registered users.
 - Create group chatrooms with selected members.
 - Invite more members to existing group chatrooms.

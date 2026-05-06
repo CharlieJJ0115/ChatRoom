@@ -4,14 +4,6 @@ A React + Firebase chatroom application for the Software Studio midterm project.
 Users can register, sign in, create private or group chatrooms, invite members,
 send realtime messages, manage profiles, and use several message operations.
 
-## Tech Stack
-
-- React
-- Vite
-- Firebase Authentication
-- Cloud Firestore
-- Firebase Hosting
-
 ## Features
 
 ### Authentication
@@ -19,7 +11,6 @@ send realtime messages, manage profiles, and use several message operations.
 - Email sign up
 - Email sign in
 - Google sign in
-- Firebase Auth based session state
 
 ### Chatrooms
 
@@ -100,25 +91,36 @@ Usernames, emails, and profile pictures are shown in chatroom UI where relevant.
 
 ### Create a Private Chat
 
-1. Click `New Chat` in the upper-left panel.
-2. Select `Private`.
-3. Choose one registered user.
-4. Click `Start Private Chat`.
+1. After signing in, click `New Chat` in the upper-left profile panel.
+2. Select `Private Chat`.
+3. Use the search box to find a registered user by username or email.
+4. Select exactly one user from the list.
+5. Click `Start Private Chat`.
+6. The private chatroom will open automatically. If a private chat with the same
+   user already exists, the app opens the existing chatroom instead of creating
+   a duplicate one.
 
 ### Create a Group Chat
 
-1. Click `New Chat` in the upper-left panel.
-2. Select `Group`.
+1. After signing in, click `New Chat` in the upper-left profile panel.
+2. Select `Group Chat`.
 3. Enter a room name.
-4. Select members from the registered user list.
-5. Click `Create Chatroom`.
+4. Use the search box to find registered users by username or email.
+5. Select one or more users from the member list.
+6. Click `Create Chatroom`.
+7. The new group chatroom will open automatically, and all selected members can
+   see and send messages in that room.
 
-### Invite Members
+### Invite Members To A Group Chat
 
 1. Open a group chatroom.
-2. Open `Room Settings`.
+2. Click the room settings button in the upper-right corner of the chat header.
 3. Click `Manage Members`.
-4. Select more users and click `Add Members`.
+4. Select users who are not already in the group.
+5. Click `Add Members`.
+
+Private chatrooms do not support inviting extra members. To chat with more than
+one other user, create a group chatroom instead.
 
 ### Send Messages
 

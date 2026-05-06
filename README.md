@@ -1,8 +1,29 @@
 # Midterm Chatroom
 
-A React + Firebase chatroom application for the Software Studio midterm project.
+A React + Firebase "Messenger" like chatroom application for the Software Studio midterm project.
 Users can register, sign in, create private or group chatrooms, invite members,
 send realtime messages, manage profiles, and use several message operations.
+
+## Project Completion Status
+
+| Category | PPT Criteria | Score | Status | Implementation Notes |
+| --- | --- | --- | --- | --- |
+| Basic | Email sign up / email sign in | 5% | Completed | Firebase Authentication supports email registration and login. |
+| Basic | Firebase Hosting | 5% | Completed | `firebase.json` is configured to deploy the Vite build output from `dist`. |
+| Basic | Authenticated database read/write | 5% | Completed | Firestore stores users, chatrooms, members, messages, reactions, read status, and block lists. |
+| Basic | RWD | 5% | Completed | The chatroom UI includes responsive sidebar/chat layouts for desktop and mobile screens. |
+| Basic | Git version control | 5% | Completed | The project is managed with Git commits during development. |
+| Basic | Chatroom core features | 25% | Completed | Users can create private/group chatrooms, invite members, send realtime messages, and load chat history. |
+| Advanced | React framework | 5% | Completed | The project is implemented with React and Vite. |
+| Advanced | Google sign in | 1% | Completed | Google sign-in is available. |
+| Advanced | Chrome notification | 5% | Completed | Notifications are sent for unread incoming messages, with an app-level notification toggle. |
+| Advanced | CSS animation | 2% | Completed | Login/register pages include animated background shapes and cursor glow effects. |
+| Advanced | Handle code-like message text | 2% | Completed | Message text is rendered as React text content, so HTML/script-like input is not executed. |
+| Advanced | User profile | 10% | Completed | Users can edit profile picture, username, email, phone number, and address in a modal. |
+| Advanced | Message operations | 10% | Completed | Users can edit/unsend own messages, search text messages, send images, and unsend own images. |
+| Bonus | Block user | 2% | Completed | Direct messages are disabled between blocked users, and group messages are mutually hidden. |
+| Bonus | Message emoji reaction | 3% | Completed | Users can add, change, remove, and view emoji reactions on messages. |
+| Bonus | Reply to specific message | 6% | Completed | Users can reply to messages, preview the reply target, scroll to the original message, and highlight it. |
 
 ## Features
 
@@ -129,6 +150,16 @@ To check other users' profile, click on their profile picture in chatrooms.
 
 - Unread chatroom count is shown as a badge when notifications are enabled.
   <img src="How_to_use_img/notification_count.png" alt="User profile panel showing New Chat button" width="300">
+
+### CSS Animation
+
+The login and register page include CSS animations in the background. The large
+soft background shapes use `authBlobFloatLeft` and `authBlobFloatRight`, and the
+smaller circles use `authFloat` and `authPulse` to create continuous motion.
+
+The page also tracks the mouse position and updates CSS variables for
+`auth-cursor-glow`, so moving the cursor creates a soft trailing light effect
+behind the authentication card.
 
 ### Block User(Bonus)
 

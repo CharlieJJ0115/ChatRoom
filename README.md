@@ -83,6 +83,7 @@ To check other users' profile, click on their profile picture in chatrooms.
   2. click the "download" button to download or "close" to exit preview(both button are in the to right corner).
   <img src="How_to_use_img/image_preview.png" alt="User profile panel showing New Chat button" width="400">
 - Edit your own text messages.
+  <img src="How_to_use_img/edit_unsend.png" alt="User profile panel showing New Chat button" width="200">
 - Unsend your own text or image messages.
 - Search messages in the current chatroom and jump to a result.
 - Reply to a specific message.

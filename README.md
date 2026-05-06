@@ -100,17 +100,22 @@ To check other users' profile, click on their profile picture in chatrooms.
   Same steps for private chatrooms.
 
 
-- Reply to a specific message.
+- Reply to a specific message. (Bonus)
   click on the middle UI butoon of the three buttons on the side of a dialog bubble
 
   <img src="How_to_use_img/message_UI.png" alt="User profile panel showing New Chat button" width="200">
   
-- Show the reply target above the composer while typing.
-- Click a replied message preview to scroll to and highlight the original message.  
+- Show the reply target above the composer while typing. (Bonus)
+- Click a replied message preview to scroll to and highlight the original message. (Bonus)  
 
-- Add an emoji reaction to a message.
-- Change or remove your own reaction.
-- View reaction counts and users.
+- Add an emoji reaction to a message. (Bonus)
+
+  <img src="How_to_use_img/message_UI.png" alt="User profile panel showing New Chat button" width="200">
+
+- Change or remove your own reaction by clicking another emoji or click the same emoji again. (Bonus)
+- View reaction counts and users by clicking on the emoji bubble. (Bonus)
+
+  <img src="How_to_use_img/view_emoji.png" alt="User profile panel showing New Chat button" width="600">
 
 ### Notifications
 
@@ -129,6 +134,16 @@ To check other users' profile, click on their profile picture in chatrooms.
 
 - View another member's profile from the chat UI.
 - Block or unblock users from the profile modal.
+
+  <img src="How_to_use_img/view_profile.png" alt="User profile panel showing New Chat button" width="600">
+
+- Manage all blocked users in the edit profile modal.
+
+  <img src="How_to_use_img/edit_profile.png" alt="User profile panel showing New Chat button" width="300">
+
+  <img src="How_to_use_img/blocked_user.png" alt="User profile panel showing New Chat button" width="300">
+
+
 - If User A blocks User B, direct messages between them are disabled.
 - Existing private chat history remains visible with a warning.
 - In group chatrooms, messages between blocked users are mutually hidden.
@@ -139,73 +154,6 @@ To check other users' profile, click on their profile picture in chatrooms.
 - On small screens, the room list and active chat view switch between mobile
   states so the main controls remain usable.
 
-## How To Use
-
-### Register and Login
-
-1. Open the app.
-2. Select `Create account` to register with email and password.
-3. Use `Sign in` for email login.
-4. Use `Sign in with Google` for Google login.
-
-### Edit Profile
-
-1. After login, click your profile area in the upper-left panel.
-2. Edit your profile picture, username, email, phone number, or address.
-3. Click `Save Profile`.
-
-### Create a Private Chat
-
-1. Click `New Chat` in the upper-left panel.
-2. Select `Private`.
-3. Choose one registered user.
-4. Click `Start Private Chat`.
-
-### Create a Group Chat
-
-1. Click `New Chat` in the upper-left panel.
-2. Select `Group`.
-3. Enter a room name.
-4. Select members from the registered user list.
-5. Click `Create Chatroom`.
-
-### Invite Members
-
-1. Open a group chatroom.
-2. Open `Room Settings`.
-3. Click `Manage Members`.
-4. Select more users and click `Add Members`.
-
-### Send Messages
-
-- Type text in the message input and press `Send`.
-- Click the image button to upload an image.
-- Paste an image into the message input area to send it as an image message.
-- Image files must be 750KB or smaller.
-
-### Message Operations
-
-- Use the message action buttons next to a message.
-- You can edit or unsend only your own messages.
-- Click reply on a message to reply to it.
-- Use the search button in room settings to search current room messages.
-- Use emoji reaction buttons to add, change, or remove your reaction.
-
-### Notifications
-
-1. Click the notification toggle in the upper-left panel.
-2. If Chrome asks for permission, allow notifications.
-3. Click the toggle again to turn app notifications off or on.
-
-Chrome notification permission is controlled by the browser. The app toggle only
-controls whether this chatroom app sends notifications after permission is
-granted.
-
-### Block and Unblock Users
-
-1. Click another user's avatar/profile in the chat UI.
-2. Click `Block User` to block them.
-3. Click `Unblock User` to allow chat again.
 
 ## Local Setup
 

@@ -1910,20 +1910,7 @@ export default function ChatPage() {
         if (message.isUnsent) return false;
         if (isBlockedMessage(message)) return false;
 
-        const sender = getUserById(message.senderId) || {
-          email: message.senderEmail,
-          username: message.senderEmail
-        };
-
-        const searchableText = [
-          message.text,
-          message.type === "image" ? "Image message" : "",
-          getDisplayName(sender),
-          sender?.email
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
+        const searchableText = (message.text || "").toLowerCase();
 
         return searchableText.includes(normalizedSearchQuery);
       })

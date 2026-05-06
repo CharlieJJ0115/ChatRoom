@@ -37,7 +37,11 @@ Click the "New Chat" button to open create chatroom modal.
   2. click the gear shape "room setting" button in the top right corner of the Current chatroom panel. 
 
   <img src="How_to_use_img/groupchat_demo.png" alt="groupchat_demo" width="600">
-  
+
+  3. Click "manage member" button.
+
+  <img src="How_to_use_img/room_setting_modal.png" alt="groupchat_demo" width="300">
+
 - Realtime room list and message updates with Firestore subscriptions.
 - Load full message history for the current chatroom.
 - Room settings for group room name and room picture.

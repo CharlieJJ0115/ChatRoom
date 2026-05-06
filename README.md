@@ -14,7 +14,7 @@ send realtime messages, manage profiles, and use several message operations.
 | Basic | RWD | 5% | Completed | The chatroom UI includes responsive sidebar/chat layouts for desktop and mobile screens. |
 | Basic | Git version control | 5% | Completed | The project is managed with Git commits during development. |
 | Basic | Chatroom core features | 25% | Completed | Users can create private/group chatrooms, invite members, send realtime messages, and load chat history. |
-| Advanced | React framework | 5% | Completed | The project is implemented with React and Vite. |
+| Advanced | React framework | 5% | Completed | The project is implemented with React. |
 | Advanced | Google sign in | 1% | Completed | Google sign-in is available. |
 | Advanced | Chrome notification | 5% | Completed | Notifications are sent for unread incoming messages, with an app-level notification toggle. |
 | Advanced | CSS animation | 2% | Completed | Login/register pages include animated background shapes and cursor glow effects. |

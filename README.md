@@ -49,6 +49,9 @@ Click the "New Chat" button to open create chatroom modal.
 - Realtime room list and message updates with Firestore subscriptions.
 - Load full message history for the current chatroom.
 - Room settings for group room name and room picture.
+
+  <img src="How_to_use_img/room_setting_modal.png" alt="groupchat_demo" width="300">
+  
 - Private chat display uses the other user's profile information.
 
 ### User Profile

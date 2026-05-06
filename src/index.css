@@ -2315,6 +2315,43 @@ h3 {
   margin: 16px 20px 0;
 }
 
+.blocked-user-search {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px 0;
+}
+
+.blocked-user-search input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  background: #ffffff;
+  outline: none;
+}
+
+.blocked-user-search input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.blocked-user-search button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 12px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 800;
+}
+
+.blocked-user-search button:hover {
+  color: #ffffff;
+  background: var(--accent);
+}
+
 .blocked-users-list {
   display: grid;
   gap: 10px;

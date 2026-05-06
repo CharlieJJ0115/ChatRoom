@@ -167,6 +167,8 @@ export default function ChatPage() {
 
   const [isBlockedUsersModalOpen, setIsBlockedUsersModalOpen] = useState(false);
 
+  const [blockedUserSearchQuery, setBlockedUserSearchQuery] = useState("");
+
   const [blockedUsersActionError, setBlockedUsersActionError] = useState("");
 
   const [viewingImageMessage, setViewingImageMessage] = useState(null);
@@ -234,6 +236,22 @@ export default function ChatPage() {
 
   const selectableUnblockedUsers = selectableUsers
     .filter((user) => !isMutuallyBlocked(user.uid));
+
+  const normalizedBlockedUserSearchQuery = blockedUserSearchQuery.trim().toLowerCase();
+
+  const filteredBlockedUsers = normalizedBlockedUserSearchQuery
+    ? selectableUsers.filter((user) => {
+        const searchableText = [
+          user.username,
+          user.email
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(normalizedBlockedUserSearchQuery);
+      })
+    : selectableUsers;
 
   const validRoomMembers = selectedRoom
     ? users.filter((user) => selectedRoom.members?.includes(user.uid))
@@ -1049,6 +1067,8 @@ export default function ChatPage() {
 
   function handleOpenBlockedUsersModal() {
 
+    setBlockedUserSearchQuery("");
+
     setBlockedUsersActionError("");
 
     setIsBlockedUsersModalOpen(true);
@@ -1060,6 +1080,8 @@ export default function ChatPage() {
     if (isUpdatingBlock) return;
 
     setIsBlockedUsersModalOpen(false);
+
+    setBlockedUserSearchQuery("");
 
     setBlockedUsersActionError("");
 
@@ -3026,12 +3048,34 @@ export default function ChatPage() {
 
               {blockedUsersActionError && <p className="form-error blocked-users-error">{blockedUsersActionError}</p>}
 
+              <div className="blocked-user-search">
+                <input
+                  type="search"
+                  placeholder="Search users by name or email"
+                  value={blockedUserSearchQuery}
+                  onChange={(e) => setBlockedUserSearchQuery(e.target.value)}
+                />
+
+                {
+                  blockedUserSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setBlockedUserSearchQuery("")}
+                    >
+                      Clear
+                    </button>
+                  )
+                }
+              </div>
+
               <div className="blocked-users-list">
                 {
                   selectableUsers.length === 0 ? (
                     <p className="empty-copy">No other registered users found.</p>
+                  ) : filteredBlockedUsers.length === 0 ? (
+                    <p className="empty-copy">No matching users found.</p>
                   ) : (
-                    selectableUsers.map((user) => {
+                    filteredBlockedUsers.map((user) => {
                       const blockedByMe = isBlockedByMe(user.uid);
                       const blockedMe = hasBlockedMe(user.uid);
 

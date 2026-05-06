@@ -13,7 +13,7 @@ send realtime messages, manage profiles, and use several message operations.
 - Google sign in
 
 ### Chatrooms
-Click the "New Chat" button to open the create chatroom modal.
+Click the "New Chat" button to open create chatroom modal.
 
 - Create private chatrooms with registered users.
 - Create group chatrooms with selected members.

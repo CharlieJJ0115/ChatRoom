@@ -130,7 +130,7 @@ To check other users' profile, click on their profile picture in chatrooms.
 - Unread chatroom count is shown as a badge when notifications are enabled.
   <img src="How_to_use_img/notification_count.png" alt="User profile panel showing New Chat button" width="300">
 
-### Block User
+### Block User(Bonus)
 
 - View another member's profile from the chat UI.
 - Block or unblock users from the profile modal.
@@ -142,6 +142,10 @@ To check other users' profile, click on their profile picture in chatrooms.
   <img src="How_to_use_img/edit_profile.png" alt="User profile panel showing New Chat button" width="300">
 
   <img src="How_to_use_img/blocked_user.png" alt="User profile panel showing New Chat button" width="300">
+
+- Block/unblock a user in the private chat `room settings`.
+
+  <img src="How_to_use_img/privatechat_setting.png" alt="User profile panel showing New Chat button" width="300">
 
 
 - If User A blocks User B, direct messages between them are disabled.

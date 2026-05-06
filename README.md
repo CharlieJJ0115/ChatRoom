@@ -192,12 +192,23 @@ behind the authentication card.
 
 ## Local Setup
 
-Install dependencies:
+Clone this project
+
+```bash
+git clone <url>
+```
+
+Open the project directory
+
+```bash
+cd ChatRoom
+```
+
+npm install
 
 ```bash
 npm install
 ```
-
 Start the local development server:
 
 ```bash
@@ -209,58 +220,3 @@ Then open the Vite local URL shown in the terminal, usually:
 ```text
 http://localhost:5173
 ```
-
-Build production files:
-
-```bash
-npm run build
-```
-
-Preview the production build locally:
-
-```bash
-npm run preview
-```
-
-Run lint:
-
-```bash
-npm run lint
-```
-
-If PowerShell blocks `npm.ps1`, use `npm.cmd` instead:
-
-```powershell
-npm.cmd install
-npm.cmd run dev
-npm.cmd run build
-npm.cmd run preview
-npm.cmd run lint
-```
-
-## Firebase Hosting
-
-This project is configured for Firebase Hosting in `firebase.json`.
-The hosting public directory is `dist`.
-
-Build before deployment:
-
-```bash
-npm run build
-```
-
-Deploy to Firebase Hosting:
-
-```bash
-firebase deploy
-```
-
-## Notes
-
-- Firebase config is defined in `src/firebase/firebase.js`.
-- Firestore is used for users, chatrooms, room membership, and messages.
-- Image messages and uploaded profile/room pictures are stored as base64 data in
-  Firestore fields.
-- The app does not implement chatbot, Tenor GIF, or custom sticker features.
-- If an AI usage report is required, provide `AI_reference.pdf` in the project
-  root separately.

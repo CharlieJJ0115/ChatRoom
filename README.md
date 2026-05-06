@@ -12,7 +12,7 @@ send realtime messages, manage profiles, and use several message operations.
 - Email sign in
 - Google sign in
 
-### Chatrooms
+### Chatroom basic functions
 Click the "New Chat" button to open create chatroom modal.
 
 <img src="How_to_use_img/user_profile.png" alt="User profile panel showing New Chat button" width="300">
@@ -30,6 +30,8 @@ Click the "New Chat" button to open create chatroom modal.
   <img src="How_to_use_img/create_groupchat.png" alt="Create chatroom modal create group chat" width="300">
 
 - Invite more members to existing group chatrooms.
+
+  <img src="How_to_use_img/groupchat_demo.png" alt="groupchat_demo" width="600">
 - Realtime room list and message updates with Firestore subscriptions.
 - Load full message history for the current chatroom.
 - Room settings for group room name and room picture.

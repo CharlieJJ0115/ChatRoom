@@ -13,32 +13,32 @@ send realtime messages, manage profiles, and use several message operations.
 - Google sign in
 
 ### Chatroom basic functions
-Click the "New Chat" button to open create chatroom modal.
+Click the `New Chat` button to open create chatroom modal.
 
 <img src="How_to_use_img/user_profile.png" alt="User profile panel showing New Chat button" width="300">
 
 - Create private chatrooms with registered users.
   1. Select 1 registered user. (search availible)
-  2. Click "start private chat" button.
+  2. Click `start private chat` button.
 
   <img src="How_to_use_img/create_privatechat.png" alt="Create chatroom modal create private chat" width="300">
 
 - Create group chatrooms with selected members.
   1. Select members you want to add in this groupchat from registered users. (search availible)
-  2. Click "Create Chatroom" button.
+  2. Click `Create Chatroom` button.
 
   <img src="How_to_use_img/create_groupchat.png" alt="Create chatroom modal create group chat" width="300">
 
 - Invite more members to existing group chatrooms.
-  1. Select the chatroom from "mychatrooms" panel
+  1. Select the chatroom from `mychatrooms` panel
 
   <img src="How_to_use_img/mychatroom_panel.png" alt="groupchat_demo" width="300">
 
-  2. click the gear shape "room setting" button in the top right corner of the Current chatroom panel. 
+  2. click the gear shape `room settings` button in the top right corner of the Current chatroom panel. 
 
   <img src="How_to_use_img/groupchat_demo.png" alt="groupchat_demo" width="600">
 
-  3. Click "manage members" button.
+  3. Click `manage members` button.
 
   <img src="How_to_use_img/room_setting_modal.png" alt="groupchat_demo" width="300">
 
@@ -80,7 +80,7 @@ To check other users' profile, click on their profile picture in chatrooms.
 - Send image messages by upload or paste.
 - Preview and download sent images.
   1. click on the image in chatroom to preview.
-  2. click the "download" button to download or "close" to exit preview(both button are in the to right corner).
+  2. click the `download` button to download or `close` to exit preview(both button are in the to right corner).
   <img src="How_to_use_img/image_preview.png" alt="User profile panel showing New Chat button" width="400">
 - Edit your own text messages.
 - Unsend your own text or image messages.
@@ -88,8 +88,8 @@ To check other users' profile, click on their profile picture in chatrooms.
   <img src="How_to_use_img/edit_unsend.png" alt="User profile panel showing New Chat button" width="200">
 
 - Search messages in the current chatroom and jump to a result.
-  1. Click "room setting" button to open room setting modal
-  2. Click "Search Messages"
+  1. Click `room settings` button to open room setting modal
+  2. Click `Search Messages`
 
   <img src="How_to_use_img/room_setting_modal.png" alt="groupchat_demo" width="300">
 

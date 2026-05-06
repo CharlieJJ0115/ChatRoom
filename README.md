@@ -31,7 +31,7 @@ Click the "New Chat" button to open create chatroom modal.
 
 - Invite more members to existing group chatrooms.
   1. Select the chatroom from "mychatrooms" panel
-  <img src="How_to_use_img/mychatroom _panel.png" alt="groupchat_demo" width="300">
+  <img src="How_to_use_img/mychatroom_panel.png" alt="groupchat_demo" width="300">
   2. click the gear shape "room setting" button in the top right corner of the Current chatroom panel. 
   <img src="How_to_use_img/groupchat_demo.png" alt="groupchat_demo" width="600">
 - Realtime room list and message updates with Firestore subscriptions.

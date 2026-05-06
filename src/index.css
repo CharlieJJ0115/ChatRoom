@@ -1934,6 +1934,7 @@ h3 {
 
 .members-modal {
   width: min(560px, 100%);
+  height: min(760px, calc(100vh - 32px));
 }
 
 .create-room-modal {
@@ -2258,10 +2259,12 @@ h3 {
 }
 
 .members-modal-body {
-  display: flex;
+  display: grid;
+  flex: 1;
   min-height: 0;
-  flex-direction: column;
-  overflow-y: auto;
+  grid-template-rows: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 16px;
+  overflow: hidden;
   padding: 20px;
 }
 
@@ -2280,13 +2283,75 @@ h3 {
 }
 
 .members-modal-list {
-  flex: 0 0 auto;
-  max-height: 38vh;
+  min-height: 0;
+  max-height: none;
   overflow-y: auto;
 }
 
 .members-modal-invite {
-  overflow-y: visible;
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  margin-top: 0;
+  overflow: hidden;
+}
+
+.members-modal-invite-search {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.members-modal-invite-search input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  background: #ffffff;
+  outline: none;
+}
+
+.members-modal-invite-search input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.members-modal-invite-search button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 12px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 800;
+}
+
+.members-modal-invite-search button:hover {
+  color: #ffffff;
+  background: var(--accent);
+}
+
+.members-modal-invite-list {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.members-modal-invite-actions {
+  flex: 0 0 auto;
+  padding-top: 10px;
+}
+
+.members-modal-invite-actions .secondary-button {
+  width: 100%;
+  min-height: 40px;
+  margin-top: 0;
 }
 
 .readonly-profile-details {

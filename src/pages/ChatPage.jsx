@@ -115,6 +115,8 @@ export default function ChatPage() {
 
   const [inviteUserIds, setInviteUserIds] = useState([]);
 
+  const [inviteUserSearchQuery, setInviteUserSearchQuery] = useState("");
+
   const [selectedRoomId, setSelectedRoomId] = useState(null);
 
   const [messages, setMessages] = useState([]);
@@ -264,6 +266,22 @@ export default function ChatPage() {
   const availableInviteUsers = selectedRoom
     ? selectableUnblockedUsers.filter((user) => !selectedRoom.members?.includes(user.uid))
     : [];
+
+  const normalizedInviteUserSearchQuery = inviteUserSearchQuery.trim().toLowerCase();
+
+  const filteredInviteUsers = normalizedInviteUserSearchQuery
+    ? availableInviteUsers.filter((user) => {
+        const searchableText = [
+          user.username,
+          user.email
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(normalizedInviteUserSearchQuery);
+      })
+    : availableInviteUsers;
 
   const normalizedCreateUserSearchQuery = createUserSearchQuery.trim().toLowerCase();
 
@@ -1223,6 +1241,8 @@ export default function ChatPage() {
 
     if (!selectedRoom) return;
 
+    setInviteUserSearchQuery("");
+
     setIsMembersModalOpen(true);
 
   }
@@ -1230,6 +1250,8 @@ export default function ChatPage() {
   function handleCloseMembersModal() {
 
     setIsMembersModalOpen(false);
+
+    setInviteUserSearchQuery("");
 
   }
 
@@ -1574,6 +1596,8 @@ export default function ChatPage() {
     if (isSameRoom) {
       setInviteUserIds([]);
 
+      setInviteUserSearchQuery("");
+
       setSearchQuery("");
 
       setIsSearchPanelOpen(false);
@@ -1609,6 +1633,8 @@ export default function ChatPage() {
 
     setInviteUserIds([]);
 
+    setInviteUserSearchQuery("");
+
     setSearchQuery("");
 
     setIsSearchPanelOpen(false);
@@ -1642,6 +1668,8 @@ export default function ChatPage() {
     setSelectedRoomId(null);
 
     setInviteUserIds([]);
+
+    setInviteUserSearchQuery("");
 
     setSearchQuery("");
 
@@ -3181,33 +3209,61 @@ export default function ChatPage() {
                       </p>
                     ) : (
                       <>
-                        {
-                          availableInviteUsers.map((user) => (
-                            <label className="member-option" key={user.uid}>
-                              <input
-                                type="checkbox"
-                                checked={inviteUserIds.includes(user.uid)}
-                                onChange={() => handleSelectInviteUser(user.uid)}
-                              />
+                        <div className="members-modal-invite-search">
+                          <input
+                            type="search"
+                            placeholder="Search users by name or email"
+                            value={inviteUserSearchQuery}
+                            onChange={(e) => setInviteUserSearchQuery(e.target.value)}
+                          />
 
-                              {renderAvatar(user)}
+                          {
+                            inviteUserSearchQuery && (
+                              <button
+                                type="button"
+                                onClick={() => setInviteUserSearchQuery("")}
+                              >
+                                Clear
+                              </button>
+                            )
+                          }
+                        </div>
 
-                              <span>
-                                <strong>{getDisplayName(user)}</strong>
-                                <small>{user.email}</small>
-                              </span>
-                            </label>
-                          ))
-                        }
+                        <div className="members-modal-invite-list">
+                          {
+                            filteredInviteUsers.length === 0 ? (
+                              <p className="empty-copy">No matching users found.</p>
+                            ) : (
+                              filteredInviteUsers.map((user) => (
+                                <label className="member-option" key={user.uid}>
+                                  <input
+                                    type="checkbox"
+                                    checked={inviteUserIds.includes(user.uid)}
+                                    onChange={() => handleSelectInviteUser(user.uid)}
+                                  />
 
-                        <button
-                          className="secondary-button"
-                          type="button"
-                          onClick={handleAddMembers}
-                          disabled={inviteUserIds.length === 0}
-                        >
-                          Add Members
-                        </button>
+                                  {renderAvatar(user)}
+
+                                  <span>
+                                    <strong>{getDisplayName(user)}</strong>
+                                    <small>{user.email}</small>
+                                  </span>
+                                </label>
+                              ))
+                            )
+                          }
+                        </div>
+
+                        <div className="members-modal-invite-actions">
+                          <button
+                            className="secondary-button"
+                            type="button"
+                            onClick={handleAddMembers}
+                            disabled={inviteUserIds.length === 0}
+                          >
+                            Add Members
+                          </button>
+                        </div>
                       </>
                     )
                   }

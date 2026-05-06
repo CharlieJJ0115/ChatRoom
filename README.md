@@ -51,8 +51,8 @@ Click the "New Chat" button to open create chatroom modal.
 - Room settings for group room name and room picture.
 
   <img src="How_to_use_img/room_setting_modal.png" alt="groupchat_demo" width="300">
-  
-- Private chat display uses the other user's profile information.
+
+- Private chat display uses the other user's profile information.(room picture and room name)
 
 ### User Profile
 

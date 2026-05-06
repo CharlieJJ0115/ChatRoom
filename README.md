@@ -18,9 +18,13 @@ Click the "New Chat" button to open create chatroom modal.
 <img src="How_to_use_img/user_profile.png" alt="User profile panel showing New Chat button" width="300">
 
 - Create private chatrooms with registered users.
-<img src="How_to_use_img/create_privatechat.png" alt="Create chatroom modal create private chat" width="300">
+
+  <img src="How_to_use_img/create_privatechat.png" alt="Create chatroom modal create private chat" width="300">
+
 - Create group chatrooms with selected members.
-<img src="How_to_use_img/create_groupchat.png" alt="Create chatroom modal create group chat" width="300">
+
+  <img src="How_to_use_img/create_groupchat.png" alt="Create chatroom modal create group chat" width="300">
+
 - Invite more members to existing group chatrooms.
 - Realtime room list and message updates with Firestore subscriptions.
 - Load full message history for the current chatroom.

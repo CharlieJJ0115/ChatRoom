@@ -57,8 +57,12 @@ Click the "New Chat" button to open create chatroom modal.
 ### User Profile
 
 Click the signed-in profile area in the upper-left panel to edit your profile.
-The editable fields are:
 
+<img src="How_to_use_img/user_profile.png" alt="User profile panel showing New Chat button" width="300">
+
+<img src="How_to_use_img/edit_profile.png" alt="User profile panel showing New Chat button" width="300">
+
+The editable fields are:
 - Profile picture URL or uploaded image
 - Username
 - Email
@@ -66,6 +70,9 @@ The editable fields are:
 - Address
 
 Usernames, emails, and profile pictures are shown in chatroom UI where relevant.
+
+To check other users' profile, click on their profile picture in chatrooms. 
+<img src="How_to_use_img/view_profile.png" alt="User profile panel showing New Chat button" width="600">
 
 ### Messages
 

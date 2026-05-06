@@ -74,7 +74,7 @@ Usernames, emails, and profile pictures are shown in chatroom UI where relevant.
 To check other users' profile, click on their profile picture in chatrooms. 
 <img src="How_to_use_img/view_profile.png" alt="User profile panel showing New Chat button" width="600">
 
-### Messages
+### Messages operations
 
 - Send text messages.
 - Send image messages by upload or paste.
@@ -83,11 +83,17 @@ To check other users' profile, click on their profile picture in chatrooms.
   2. click the "download" button to download or "close" to exit preview(both button are in the to right corner).
   <img src="How_to_use_img/image_preview.png" alt="User profile panel showing New Chat button" width="400">
 - Edit your own text messages.
+- Unsend your own text or image messages.
 
   <img src="How_to_use_img/edit_unsend.png" alt="User profile panel showing New Chat button" width="200">
-- Unsend your own text or image messages.
-- Search messages in the current chatroom and jump to a result.
+
 - Reply to a specific message.
+  click on the middle UI butoon of the three buttons on the side of a dialog bubble
+
+  <img src="How_to_use_img/message_UI.png" alt="User profile panel showing New Chat button" width="200">
+  
+  
+- Search messages in the current chatroom and jump to a result.
 - Show the reply target above the composer while typing.
 - Click a replied message preview to scroll to and highlight the original message.
 - Add an emoji reaction to a message.

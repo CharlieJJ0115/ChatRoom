@@ -20,6 +20,7 @@ Click the "New Chat" button to open create chatroom modal.
 - Create private chatrooms with registered users.
   1. select 1 registered user. (search availible)
   2. click "start private chat" button
+  
   <img src="How_to_use_img/create_privatechat.png" alt="Create chatroom modal create private chat" width="300">
 
 - Create group chatrooms with selected members.

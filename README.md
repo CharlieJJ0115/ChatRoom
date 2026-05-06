@@ -74,7 +74,7 @@ Usernames, emails, and profile pictures are shown in chatroom UI where relevant.
 To check other users' profile, click on their profile picture in chatrooms. 
 <img src="How_to_use_img/view_profile.png" alt="User profile panel showing New Chat button" width="600">
 
-### Messages operations
+### Message operations
 
 - Send text messages.
 - Send image messages by upload or paste.
@@ -93,11 +93,11 @@ To check other users' profile, click on their profile picture in chatrooms.
 
   <img src="How_to_use_img/room_setting_modal.png" alt="groupchat_demo" width="300">
 
-  3. Type the message you want to search in the search bar, and click on the message to go to the selected mesage in this chatroom.
+  3. Type the message you want to search in the search bar and click on the message to go to the selected mesage in this chatroom.
 
   <img src="How_to_use_img/search_message.png" alt="groupchat_demo" width="600">
 
-  Same step for private chatrooms.
+  Same steps for private chatrooms.
 
 
 - Reply to a specific message.
@@ -119,8 +119,11 @@ To check other users' profile, click on their profile picture in chatrooms.
 - If the current tab is visible and focused on the active room, the app does not
   send a duplicate browser notification.
 - App-level notification toggle is available in the profile panel.
-- The notification toggle state is saved in `localStorage`.
+
+  <img src="How_to_use_img/user_profile.png" alt="User profile panel showing New Chat button" width="300">
+
 - Unread chatroom count is shown as a badge when notifications are enabled.
+  <img src="How_to_use_img/notification_count.png" alt="User profile panel showing New Chat button" width="300">
 
 ### Block User
 

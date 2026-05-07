@@ -149,6 +149,7 @@ To check other users' profile, click on their profile picture in chatrooms.
   <img src="How_to_use_img/user_profile.png" alt="User profile panel showing New Chat button" width="300">
 
 - Unread chatroom count is shown as a badge when notifications are enabled.
+
   <img src="How_to_use_img/notification_count.png" alt="User profile panel showing New Chat button" width="300">
 
 ### CSS Animation

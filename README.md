@@ -101,7 +101,7 @@ To check other users' profile, click on their profile picture in chatrooms.
 - Send image messages by upload or paste.
 - Preview and download sent images.
   1. click on the image in chatroom to preview.
-  2. click the `download` button to download or `close` to exit preview(both button are in the to right corner).
+  2. click the `download` button to download or `close` to exit preview(both button are in the top right corner).
   <img src="How_to_use_img/image_preview.png" alt="User profile panel showing New Chat button" width="400">
 - Edit your own text messages.
 - Unsend your own text or image messages.
